@@ -147,6 +147,9 @@
       gap: 8px;
       flex-wrap: wrap;
     }
+    .api-btn-row {
+      display: contents;
+    }
     .api-text {
       flex: 1;
       font-size: 12px;
@@ -161,8 +164,7 @@
     .btn {
       font-size: 12px;
       font-weight: 700;
-      padding: 0 16px;
-      height: 36px;
+      padding: 8px 16px;
       border-radius: var(--r-sm);
       border: 1.5px solid var(--border-md);
       background: var(--surface);
@@ -170,72 +172,62 @@
       cursor: pointer;
       transition: all 0.15s;
       white-space: nowrap;
-      display: inline-flex;
-      align-items: center;
       box-shadow: var(--shadow-xs);
     }
     .btn:hover { border-color: #d0d5dd; background: #fafbfc; color: var(--text); }
     .btn.primary { border-color: #b3d0ff; background: var(--accent-bg); color: var(--accent); }
     .btn.primary:hover { background: #dde9ff; }
-    .btn.active { border-color: #a3e0d3; background: var(--green-bg); color: var(--green); }
 
-    /* 토글 스위치 */
+    /* ── 자동갱신 토글 ── */
     .toggle-wrap {
-      display: flex;
+      display: inline-flex;
       align-items: center;
       gap: 8px;
-      cursor: pointer;
-      padding: 8px 16px;
-      border-radius: 10px;
+      padding: 6px 14px;
+      border-radius: var(--r-sm);
       border: 1.5px solid var(--border-md);
       background: var(--surface);
+      cursor: pointer;
+      white-space: nowrap;
       box-shadow: var(--shadow-xs);
-      transition: all 0.15s;
-      height: 36px;
-      box-sizing: border-box;
+      user-select: none;
+      transition: border-color 0.15s, background 0.15s;
     }
-    .toggle-wrap:hover { border-color: #c9d1d9; background: #f8f9fa; }
-    .toggle-label {
+    .toggle-wrap:hover { border-color: #d0d5dd; background: #fafbfc; }
+    .toggle-label-text {
       font-size: 12px;
       font-weight: 700;
       color: var(--text-sub);
-      white-space: nowrap;
-      user-select: none;
     }
     .toggle-switch {
+      width: 36px;
+      height: 20px;
+      border-radius: 999px;
+      background: #d1d5db;
       position: relative;
-      width: 44px;
-      height: 24px;
+      transition: background 0.2s;
       flex-shrink: 0;
     }
-    .toggle-switch input { display: none; }
-    .toggle-track {
+    .toggle-switch.on { background: var(--green); }
+    .toggle-knob {
       position: absolute;
-      inset: 0;
-      border-radius: 999px;
-      background: var(--border-md);
-      transition: background 0.2s;
-      cursor: pointer;
-    }
-    .toggle-thumb {
-      position: absolute;
-      top: 3px; left: 3px;
-      width: 18px; height: 18px;
+      top: 2px;
+      left: 2px;
+      width: 16px;
+      height: 16px;
       border-radius: 50%;
       background: #fff;
-      box-shadow: 0 1px 4px rgba(0,0,0,0.15);
-      transition: transform 0.2s;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+      transition: transform 0.2s cubic-bezier(.4,0,.2,1);
     }
-    .toggle-switch.on .toggle-track { background: var(--green); }
-    .toggle-switch.on .toggle-thumb { transform: translateX(20px); }
-    .toggle-state {
-      font-size: 11px;
-      font-weight: 900;
-      color: var(--green);
-      min-width: 20px;
-      user-select: none;
+    .toggle-switch.on .toggle-knob { transform: translateX(16px); }
+    .toggle-state-text {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-muted);
+      min-width: 22px;
     }
-    .toggle-wrap:has(.toggle-switch:not(.on)) .toggle-state { color: var(--text-muted); }
+    .toggle-state-text.on { color: var(--green); }
 
     /* ── 메인 그리드 ── */
     .main-grid {
@@ -607,112 +599,6 @@
     .check-tag.wait    { background: var(--border);    color: var(--text-sub); }
     .check-tag.partial { background: var(--orange-bg); color: var(--orange); }
 
-    /* ── 탭 ── */
-    .tab-bar {
-      max-width: 1200px;
-      margin: 0 auto 14px;
-      display: flex;
-      gap: 0;
-      border-bottom: 2px solid var(--border);
-    }
-    .tab-btn {
-      padding: 10px 24px;
-      border: none;
-      border-bottom: 3px solid transparent;
-      margin-bottom: -2px;
-      background: transparent;
-      color: var(--text-muted);
-      font-size: 14px;
-      font-weight: 700;
-      font-family: 'Noto Sans KR', sans-serif;
-      cursor: pointer;
-      transition: all 0.18s;
-    }
-    .tab-btn.active {
-      color: var(--accent);
-      border-bottom-color: var(--accent);
-    }
-    .tab-btn:hover:not(.active) { color: var(--text-sub); }
-
-    .tab-content { display: none; }
-    .tab-content.active { display: block; }
-
-    /* ── 3위 순위표 ── */
-    .standing-table {
-      max-width: 1200px;
-      margin: 0 auto;
-      background: var(--surface);
-      border-radius: var(--r-lg);
-      overflow: hidden;
-      box-shadow: var(--shadow-sm);
-    }
-    .standing-head {
-      padding: 16px 20px;
-      border-bottom: 1.5px solid var(--border);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      background: #fafbff;
-    }
-    .standing-head-title { font-size: 14px; font-weight: 900; color: var(--text); }
-    .standing-cols {
-      display: grid;
-      grid-template-columns: 28px 1fr 36px 36px 36px 36px 36px 36px 36px 40px;
-      gap: 0;
-      padding: 8px 16px;
-      font-size: 10px;
-      font-weight: 700;
-      color: var(--text-muted);
-      border-bottom: 1px solid var(--border);
-      text-align: center;
-    }
-    .standing-cols .col-team { text-align: left; }
-    .standing-row {
-      display: grid;
-      grid-template-columns: 28px 1fr 36px 36px 36px 36px 36px 36px 36px 40px;
-      gap: 0;
-      padding: 10px 16px;
-      border-bottom: 1px solid var(--border-light);
-      align-items: center;
-      font-size: 12px;
-      text-align: center;
-      transition: background 0.1s;
-    }
-    .standing-row:last-child { border-bottom: none; }
-    .standing-row:hover { background: #fafbfc; }
-    .standing-row.is-korea {
-      background: #fff0f0;
-      font-weight: 700;
-    }
-    .standing-row.is-korea:hover { background: #ffe8e8; }
-    .standing-row.qualify { border-left: 3px solid var(--green); }
-    .standing-row.border-line { border-left: 3px solid var(--orange); }
-    .rank-num {
-      font-size: 11px;
-      font-weight: 700;
-      color: var(--text-muted);
-    }
-    .rank-num.top { color: var(--green); }
-    .rank-num.border { color: var(--orange); }
-    .team-name-cell {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      text-align: left;
-    }
-    .team-flag { font-size: 16px; }
-    .team-name { font-size: 12px; font-weight: 700; color: var(--text); }
-    .pts-cell { font-weight: 900; color: var(--text); font-size: 13px; }
-    .gd-cell { font-size: 11px; }
-    .gd-pos { color: var(--green); font-weight: 700; }
-    .gd-neg { color: var(--red); font-weight: 700; }
-    .standing-loading {
-      padding: 40px;
-      text-align: center;
-      color: var(--text-muted);
-      font-size: 13px;
-    }
-
     /* ── 모바일 ── */
     @media (max-width: 820px) {
       body { padding: 16px 14px 72px; }
@@ -734,17 +620,11 @@
       .need-badge  { padding: 8px 14px; }
       .need-num    { font-size: 24px; }
 
-      .api-bar { gap: 6px; }
-      .btn { font-size: 11px; padding: 7px 12px; }
-
-      .tab-bar { margin-bottom: 12px; }
-      .tab-btn { font-size: 13px; padding: 9px 16px; }
-
-      .standing-cols,
-      .standing-row { grid-template-columns: 24px 1fr 30px 30px 30px 30px 30px 30px 30px 34px; padding: 8px 12px; font-size: 11px; }
-      .team-flag { font-size: 14px; }
-      .team-name { font-size: 11px; }
-      .pts-cell { font-size: 12px; }
+      .api-bar { gap: 6px; flex-direction: column; align-items: flex-start; }
+      .api-btn-row { display: flex; flex-wrap: nowrap; overflow-x: auto; -webkit-overflow-scrolling: touch; padding-bottom: 2px; gap: 6px; width: 100%; }
+      .api-bar .api-text { min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%; }
+      .btn { font-size: 11px; padding: 7px 12px; flex-shrink: 0; }
+      .toggle-wrap { flex-shrink: 0; }
 
       .main-grid { grid-template-columns: 1fr; gap: 12px; }
 
@@ -805,53 +685,35 @@
 <!-- API 상태 바 -->
 <div class="api-bar">
   <div class="api-text" id="apiText">⏳ ESPN 데이터 불러오는 중...</div>
-  <div class="toggle-wrap" onclick="toggleAuto()">
-    <span class="toggle-label">자동갱신(1분)</span>
-    <div class="toggle-switch" id="autoBtn">
-      <div class="toggle-track"></div>
-      <div class="toggle-thumb"></div>
-    </div>
-    <span class="toggle-state" id="autoState">ON</span>
-  </div>
-  <button class="btn primary" onclick="fetchAll()">🔄 지금 새로고침</button>
-</div>
-
-
-
-<!-- 탭 바 -->
-<div class="tab-bar">
-  <button class="tab-btn active" onclick="switchTab('cases')">📋 경우의 수</button>
-  <button class="tab-btn" onclick="switchTab('standing')">🏆 각 조 3위 팀 순위</button>
-</div>
-
-<!-- 탭1: 경우의 수 -->
-<div class="tab-content active" id="tab-cases">
-  <div class="main-grid">
-    <div class="panel">
-      <div class="panel-head">
-        <div class="panel-title">⚽ 경기 일정 · 실시간 스코어</div>
-        <div class="panel-badge" id="liveBadge">대기중</div>
+  <div class="api-btn-row">
+    <label class="toggle-wrap" onclick="toggleAuto()">
+      <span class="toggle-label-text">자동갱신(1분)</span>
+      <div class="toggle-switch" id="autoToggle">
+        <div class="toggle-knob"></div>
       </div>
-      <div id="scheduleList"></div>
-    </div>
-    <div class="panel">
-      <div class="panel-head">
-        <div class="panel-title">📋 조건 체크리스트</div>
-        <div class="panel-badge" id="checkBadge">0 / 11</div>
-      </div>
-      <div id="checkList"></div>
-    </div>
+      <span class="toggle-state-text" id="autoStateText">OFF</span>
+    </label>
+    <button class="btn primary" onclick="fetchAll()">🔄 지금 새로고침</button>
+    <a class="btn" href="https://search.naver.com/search.naver?sm=tab_hty.top&where=nexearch&ssc=tab.nx.all&query=%EC%9B%94%EB%93%9C%EC%BB%B5+3%EC%9C%84+%EC%88%9C%EC%9C%84" target="_blank" style="text-decoration:none;">🏆 각 조 3위 순위 확인 <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-left:2px;margin-bottom:1px;"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>
   </div>
 </div>
 
-<!-- 탭2: 3위 순위 -->
-<div class="tab-content" id="tab-standing">
-  <div class="standing-table">
-    <div class="standing-head">
-      <div class="standing-head-title">🏆 각 조 3위 팀 순위</div>
-      <div class="panel-badge" id="standingBadge">불러오는 중</div>
+<!-- 메인 그리드 -->
+<div class="main-grid">
+  <div class="panel">
+    <div class="panel-head">
+      <div class="panel-title">⚽ 경기 일정 · 실시간 스코어</div>
+      <div class="panel-badge" id="liveBadge">대기중</div>
     </div>
-    <div id="standingList"><div class="standing-loading">⏳ 데이터 불러오는 중...</div></div>
+    <div id="scheduleList"></div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-head">
+      <div class="panel-title">📋 조건 체크리스트</div>
+      <div class="panel-badge" id="checkBadge">0 / 11</div>
+    </div>
+    <div id="checkList"></div>
   </div>
 </div>
 
@@ -1264,10 +1126,6 @@ async function fetchAll(){
       `✅ ${t} · ${ok}개 수신(${foundIds||'없음'}) / ${notFound}개 미확인(일정前)`);
   }
   render();
-  // 3위 순위 탭도 같이 갱신
-  standingCache = null;
-  if(document.getElementById('tab-standing').classList.contains('active')) fetchStanding();
-  else fetchStanding(); // 백그라운드 갱신
 }
 
 function setApiStatus(cls, msg){
@@ -1457,15 +1315,18 @@ document.addEventListener('DOMContentLoaded', () => {
 })();
 
 function toggleAuto(){
-  const btn = document.getElementById('autoBtn');
+  const sw = document.getElementById('autoToggle');
+  const txt = document.getElementById('autoStateText');
   if(autoTimer){
     clearInterval(autoTimer);
     autoTimer=null;
-    btn.classList.remove('on');
-    document.getElementById('autoState').textContent = 'OFF';
+    sw.classList.remove('on');
+    txt.className='toggle-state-text';
+    txt.textContent='OFF';
   } else {
-    btn.classList.add('on');
-    document.getElementById('autoState').textContent = 'ON';
+    sw.classList.add('on');
+    txt.className='toggle-state-text on';
+    txt.textContent='ON';
     fetchAll();
     autoTimer=setInterval(fetchAll,60000);
   }
@@ -1631,303 +1492,9 @@ function render(){
 }
 
 // ─────────────────────────────────────────
-// 디버그: API 원본 출력
-// ─────────────────────────────────────────
-async function runDebug(){
-  const box = document.getElementById('debugBox');
-  const out = document.getElementById('debugContent');
-  box.style.display = 'block';
-  out.textContent = '⏳ ESPN API 조회 중...\n';
-
-  // 최근 5일치 날짜 + 파라미터 없는 호출
-  const dates = [null];
-  for(let i=0;i<=5;i++){
-    const d=new Date(); d.setDate(d.getDate()-i);
-    dates.push(`${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}`);
-  }
-
-  for(const date of dates){
-    const url = date
-      ? `https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/scoreboard?dates=${date}`
-      : `https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/scoreboard`;
-    try {
-      const res = await fetch(url, {cache:'no-store'});
-      if(!res.ok){ out.textContent += `[${date||'nodate'}] HTTP ${res.status}\n`; continue; }
-      const data = await res.json();
-      const evs = data?.events||[];
-      if(!evs.length){ out.textContent += `[${date||'nodate'}] 경기 없음\n`; continue; }
-      out.textContent += `\n━━ ${date||'(날짜없음)'} — ${evs.length}경기 ━━\n`;
-      for(const ev of evs){
-        const comp = ev.competitions?.[0];
-        const teams = (comp?.competitors||[]).map(t=>`${t.team?.displayName}(${t.team?.abbreviation}) ${t.score??'-'}`).join(' vs ');
-        const st = comp?.status?.type?.state;
-        const done = comp?.status?.type?.completed;
-        const clock = comp?.status?.displayClock||'';
-        out.textContent += `  ${teams} | ${st}${done?' ✓완료':''} ${clock}\n`;
-      }
-    } catch(e){
-      out.textContent += `[${date||'nodate'}] 오류: ${e.message}\n`;
-    }
-  }
-  out.textContent += '\n✅ 조회 완료';
-}
-
-// ─────────────────────────────────────────
-// 탭 전환
-// ─────────────────────────────────────────
-function switchTab(tab) {
-  document.querySelectorAll('.tab-btn').forEach((b,i) => {
-    b.classList.toggle('active', (i===0&&tab==='cases')||(i===1&&tab==='standing'));
-  });
-  document.getElementById('tab-cases').classList.toggle('active', tab==='cases');
-  document.getElementById('tab-standing').classList.toggle('active', tab==='standing');
-  if(tab==='standing') fetchStanding();
-}
-
-// ─────────────────────────────────────────
-// 3위 순위 fetch
-// ─────────────────────────────────────────
-const TEAM_FLAGS = {
-  'sweden':'🇸🇪','ecuador':'🇪🇨','bosnia':'🇧🇦','paraguay':'🇵🇾','croatia':'🇭🇷',
-  'korea':'🇰🇷','south korea':'🇰🇷','republic of korea':'🇰🇷','korea republic':'🇰🇷',
-  'algeria':'🇩🇿','scotland':'🏴󠁧󠁢󠁳󠁣󠁴󠁿','cabo verde':'🇨🇻','cape verde':'🇨🇻',
-  'belgium':'🇧🇪','dr congo':'🇨🇩','congo':'🇨🇩','senegal':'🇸🇳',
-  'brazil':'🇧🇷','japan':'🇯🇵','spain':'🇪🇸','germany':'🇩🇪','france':'🇫🇷',
-  'argentina':'🇦🇷','australia':'🇦🇺','egypt':'🇪🇬','iran':'🇮🇷','iraq':'🇮🇶',
-  'portugal':'🇵🇹','colombia':'🇨🇴','england':'🏴󠁧󠁢󠁥󠁮󠁧󠁿','ghana':'🇬🇭',
-  'austria':'🇦🇹','uzbekistan':'🇺🇿','uruguay':'🇺🇾','saudi':'🇸🇦','mexico':'🇲🇽',
-  'netherlands':'🇳🇱','norway':'🇳🇴','morocco':'🇲🇦','haiti':'🇭🇹','czech':'🇨🇿',
-  'turkey':'🇹🇷','tunisia':'🇹🇳','new zealand':'🇳🇿','jordan':'🇯🇴','curacao':'🇨🇼',
-  'switzerland':'🇨🇭','canada':'🇨🇦','qatar':'🇶🇦','south africa':'🇿🇦','cameroon':'🇨🇲',
-};
-
-function getFlag(name) {
-  const n = (name||'').toLowerCase();
-  for(const [k,v] of Object.entries(TEAM_FLAGS)) {
-    if(n.includes(k)) return v;
-  }
-  return '🏳️';
-}
-
-let standingCache = null;
-let standingFetching = false;
-
-const TEAM_KO = {
-  'MEX':'멕시코','CZE':'체코','RSA':'남아공','KOR':'대한민국',
-  'CAN':'캐나다','BIH':'보스니아','QAT':'카타르','SUI':'스위스',
-  'BRA':'브라질','SCO':'스코틀랜드','MAR':'모로코','HAI':'아이티',
-  'USA':'미국','PAR':'파라과이','AUS':'호주','TUR':'튀르키예',
-  'GER':'독일','CIV':'코트디부아르','ECU':'에콰도르','CUW':'퀴라소',
-  'NED':'네덜란드','JPN':'일본','SWE':'스웨덴','TUN':'튀니지',
-  'BEL':'벨기에','IRN':'이란','EGY':'이집트','NZL':'뉴질랜드',
-  'ESP':'스페인','URU':'우루과이','CPV':'카보베르데','KSA':'사우디',
-  'FRA':'프랑스','SEN':'세네갈','NOR':'노르웨이','IRQ':'이라크',
-  'ARG':'아르헨티나','AUT':'오스트리아','ALG':'알제리','JOR':'요르단',
-  'POR':'포르투갈','COL':'콜롬비아','UZB':'우즈베키스탄','COD':'콩고DR',
-  'ENG':'잉글랜드','GHA':'가나','CRO':'크로아티아','PAN':'파나마',
-};
-
-const TEAM_GROUP = {
-  'MEX':'A','CZE':'A','RSA':'A','KOR':'A',
-  'CAN':'B','BIH':'B','QAT':'B','SUI':'B',
-  'BRA':'C','SCO':'C','MAR':'C','HAI':'C',
-  'USA':'D','PAR':'D','AUS':'D','TUR':'D',
-  'GER':'E','CIV':'E','ECU':'E','CUW':'E',
-  'NED':'F','JPN':'F','SWE':'F','TUN':'F',
-  'BEL':'G','IRN':'G','EGY':'G','NZL':'G',
-  'ESP':'H','URU':'H','CPV':'H','KSA':'H',
-  'FRA':'I','SEN':'I','NOR':'I','IRQ':'I',
-  'ARG':'J','AUT':'J','ALG':'J','JOR':'J',
-  'POR':'K','COL':'K','UZB':'K','COD':'K',
-  'ENG':'L','GHA':'L','CRO':'L','PAN':'L',
-};
-
-async function fetchStanding() {
-  if(standingFetching) return;
-  standingFetching = true;
-
-  const listEl = document.getElementById('standingList');
-  const badge  = document.getElementById('standingBadge');
-  if(!standingCache) listEl.innerHTML = '<div class="standing-loading">⏳ 불러오는 중...</div>';
-
-  try {
-    // 날짜별로만 호출 (중복 방지를 위해 null 제거)
-    const dates = [];
-    for(let i=14; i>=-1; i--) {
-      const d = new Date(); d.setDate(d.getDate()-i);
-      dates.push(`${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}`);
-    }
-
-    const teams = {};
-    const seenEvents = new Set();
-    // ESPN에서 한국 약자가 다를 수 있어서 추가 매핑
-    const ABBR_ALIAS = {'SKO':'KOR','PRK':'KOR','KR':'KOR'};
-
-    await Promise.allSettled(dates.map(async date => {
-      try {
-        const res = await fetch(`${ESPN}?dates=${date}`, {cache:'no-store'});
-        if(!res.ok) return;
-        const data = await res.json();
-
-        for(const ev of (data?.events||[])) {
-          const evId = ev?.id;
-          if(!evId || seenEvents.has(evId)) continue; // 중복 경기 완전 차단
-          const comp = ev?.competitions?.[0];
-          if(!comp?.status?.type?.completed) continue;
-          seenEvents.add(evId);
-
-          const competitors = comp?.competitors || [];
-          if(competitors.length !== 2) continue;
-
-          for(const side of competitors) {
-            let abbr = side?.team?.abbreviation || '';
-            if(ABBR_ALIAS[abbr]) abbr = ABBR_ALIAS[abbr];
-            const grp = TEAM_GROUP[abbr];
-            if(!grp) continue;
-
-            const score    = Number(side?.score ?? 0);
-            const opp      = competitors.find(c => c.team?.abbreviation !== abbr);
-            const oppScore = Number(opp?.score ?? 0);
-
-            if(!teams[abbr]) teams[abbr] = {
-              abbr,
-              name: TEAM_KO[abbr] || side?.team?.displayName || '',
-              group: grp,
-              logo: 'https://a.espncdn.com/i/teamlogos/countries/500/' + abbr.toLowerCase() + '.png',
-              gp:0, w:0, d:0, l:0, gf:0, ga:0, pts:0,
-              yellowCards:0, redCards:0, yellowRedCards:0  // 페어플레이용
-            };
-            const t = teams[abbr];
-            t.gp++;
-            t.gf += score;
-            t.ga += oppScore;
-            if(side.winner === true)      { t.w++; t.pts += 3; }
-            else if(opp?.winner === true) { t.l++; }
-            else                          { t.d++; t.pts += 1; }
-
-            // ── 페어플레이 카드 파싱 ──
-            // ESPN statistics 배열에서 카드 데이터 추출 (필드명 방어적으로 탐색)
-            const stats = side?.statistics || [];
-            const findStat = (...names) => {
-              for(const name of names) {
-                const s = stats.find(s => (s.name||'').toLowerCase() === name.toLowerCase());
-                if(s) return Number(s.displayValue ?? s.value ?? 0);
-              }
-              return 0;
-            };
-            const yc  = findStat('yellowCards','yellowcards','yellow cards','YC');
-            const rc  = findStat('redCards','redcards','red cards','RC');
-            const yrc = findStat('yellowRedCards','yellowredcards','yellow red cards','YRC');
-            t.yellowCards    += yc;
-            t.redCards       += rc;
-            t.yellowRedCards += yrc;
-            // 브라우저 콘솔 확인용 — ESPN이 어떤 필드명 쓰는지 첫 경기만 출력
-            if(t.gp === 1 && stats.length > 0) {
-              console.log(`[카드디버그] ${abbr} stats 필드:`, stats.map(s => s.name));
-            }
-          }
-        }
-      } catch(e) {}
-    }));
-
-    // 각 조 3위 추출
-    const byGroup = {};
-    Object.values(teams).forEach(t => {
-      if(!byGroup[t.group]) byGroup[t.group] = [];
-      byGroup[t.group].push(t);
-    });
-
-    const thirdPlaces = [];
-    'ABCDEFGHIJKL'.split('').forEach(grp => {
-      const list = (byGroup[grp]||[]);
-      list.sort((a,b)=>(b.pts-a.pts)||((b.gf-b.ga)-(a.gf-a.ga))||(b.gf-a.gf));
-      if(list.length >= 3) {
-        thirdPlaces.push({...list[2], gd: list[2].gf - list[2].ga});
-      }
-    });
-
-    if(thirdPlaces.length === 0) {
-      listEl.innerHTML = '<div class="standing-loading">⚠️ 아직 완료된 경기가 부족해요.<br>경기가 더 진행되면 순위가 표시됩니다.</div>';
-      standingFetching = false;
-      return;
-    }
-
-    // ── FIFA 공식 조 3위 순위 결정 기준 ──
-    // 1. 승점  2. 골득실  3. 다득점  4. 페어플레이(TCS)  5. (FIFA랭킹 — 현재 미지원)
-    // TCS: 옐로카드 -1, 옐로+레드(YRC) -3, 레드카드(직접) -3
-    const calcTCS = t => -(t.yellowCards * 1 + t.yellowRedCards * 3 + t.redCards * 3);
-
-    thirdPlaces.sort((a,b) =>
-      (b.pts - a.pts) ||
-      (b.gd  - a.gd)  ||
-      (b.gf  - a.gf)  ||
-      (calcTCS(b) - calcTCS(a)) // TCS: 점수 낮을수록(덜 받을수록) 유리 → b-a 반전
-    );
-    standingCache = thirdPlaces;
-    renderStanding(thirdPlaces);
-
-    badge.textContent = new Date().toLocaleTimeString('ko-KR') + ' 갱신';
-
-  } catch(e) {
-    listEl.innerHTML = `<div class="standing-loading">❌ 오류: ${e.message}</div>`;
-  }
-  standingFetching = false;
-}
-
-function renderStanding(list) {
-  const listEl = document.getElementById('standingList');
-  const header = `
-    <div class="standing-cols">
-      <div></div>
-      <div class="col-team">팀</div>
-      <div>경기</div><div>승</div><div>무</div><div>패</div>
-      <div>득점</div><div>실점</div><div>TCS</div><div>승점</div>
-    </div>`;
-
-  const rows = list.map((t,i) => {
-    const rank = i+1;
-    const isKorea = t.abbr === 'KOR';
-    const borderLine = rank === 8;
-    const rankClass = rank <= 4 ? 'top' : rank <= 8 ? 'border' : '';
-    const rowClass = [
-      'standing-row',
-      isKorea ? 'is-korea' : '',
-      rank < 8 ? 'qualify' : '',
-      borderLine ? 'border-line' : ''
-    ].filter(Boolean).join(' ');
-
-    return `
-    <div class="${rowClass}">
-      <div class="rank-num ${rankClass}">${rank}</div>
-      <div class="team-name-cell">
-        ${t.logo
-          ? `<img src="${t.logo}" style="width:22px;height:15px;object-fit:cover;border-radius:2px;border:1px solid var(--border);" onerror="this.style.display='none'">`
-          : `<span class="team-flag">${getFlag(t.name)}</span>`
-        }
-        <span class="team-name">${t.name}</span>
-        <span style="font-size:9px;color:var(--text-muted);margin-left:3px;background:var(--border);padding:1px 5px;border-radius:4px;">${t.group}조</span>
-      </div>
-      <div>${t.gp}</div><div>${t.w}</div><div>${t.d}</div><div>${t.l}</div>
-      <div>${t.gf}</div><div>${t.ga}</div>
-      <div style="font-size:11px;color:${(t.yellowCards||0)+(t.redCards||0)+(t.yellowRedCards||0)>0?'var(--orange)':'var(--text-muted)'}">
-        ${-(t.yellowCards||0)-(t.yellowRedCards||0)*3-(t.redCards||0)*3 || '—'}
-      </div>
-      <div class="pts-cell">${t.pts}</div>
-    </div>`;
-  }).join('');
-
-  listEl.innerHTML = header + rows + `
-    <div style="padding:10px 16px;font-size:11px;color:var(--text-muted);border-top:1px solid var(--border-light);">
-      🟢 진출권 (상위 8팀) &nbsp;|&nbsp; 🟠 경계선 (8위)<br>
-      <span style="margin-top:4px;display:block;">* 순위 기준: 승점 → 골득실 → 다득점 → TCS(페어플레이) → FIFA랭킹</span>
-      <span style="margin-top:2px;display:block;color:var(--text-muted);">† TCS는 ESPN이 카드 데이터를 제공할 때만 반영 (콘솔에서 [카드디버그] 확인)</span>
-    </div>`;
-}
-// ─────────────────────────────────────────
 // 초기 실행
 // ─────────────────────────────────────────
 // 초기 로딩 표시 (API 오기 전엔 확률 숫자 숨김)
-document.getElementById('autoBtn').classList.add('on');
 document.getElementById('probNum').textContent = '- -';
 document.getElementById('probNum').style.fontSize = 'clamp(24px,3.5vw,36px)';
 document.getElementById('probNum').style.color = '#b0b8c1';
