@@ -178,6 +178,8 @@
     .btn.primary { border-color: #b3d0ff; background: var(--accent-bg); color: var(--accent); }
     .btn.primary:hover { background: #dde9ff; }
 
+    .txt-short { display: none; }
+
     /* ── 자동갱신 토글 ── */
     .toggle-wrap {
       display: inline-flex;
@@ -620,11 +622,14 @@
       .need-badge  { padding: 8px 14px; }
       .need-num    { font-size: 24px; }
 
-      .api-bar { gap: 6px; flex-direction: column; align-items: flex-start; }
-      .api-btn-row { display: flex; flex-wrap: nowrap; overflow-x: auto; -webkit-overflow-scrolling: touch; padding-bottom: 2px; gap: 6px; width: 100%; }
-      .api-bar .api-text { min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%; }
+      .api-bar { gap: 6px; }
+      .api-btn-row { flex-wrap: nowrap; gap: 6px; width: 100%; }
+      .api-bar .api-text { min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
       .btn { font-size: 11px; padding: 7px 12px; flex-shrink: 0; }
       .toggle-wrap { flex-shrink: 0; }
+      .txt-long { display: none; }
+      .txt-short { display: inline; }
+      .toggle-state-text { display: none; }
 
       .main-grid { grid-template-columns: 1fr; gap: 12px; }
 
@@ -687,14 +692,14 @@
   <div class="api-text" id="apiText">⏳ ESPN 데이터 불러오는 중...</div>
   <div class="api-btn-row">
     <label class="toggle-wrap" onclick="toggleAuto()">
-      <span class="toggle-label-text">자동갱신(1분)</span>
+      <span class="toggle-label-text"><span class="txt-long">자동갱신(1분)</span><span class="txt-short">자동갱신</span></span>
       <div class="toggle-switch" id="autoToggle">
         <div class="toggle-knob"></div>
       </div>
       <span class="toggle-state-text" id="autoStateText">OFF</span>
     </label>
-    <button class="btn primary" onclick="fetchAll()">🔄 지금 새로고침</button>
-    <a class="btn" href="https://search.naver.com/search.naver?sm=tab_hty.top&where=nexearch&ssc=tab.nx.all&query=%EC%9B%94%EB%93%9C%EC%BB%B5+3%EC%9C%84+%EC%88%9C%EC%9C%84" target="_blank" style="text-decoration:none;">🏆 각 조 3위 순위 확인 <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-left:2px;margin-bottom:1px;"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>
+    <button class="btn primary" onclick="fetchAll()">🔄 <span class="txt-long">지금 </span>새로고침</button>
+    <a class="btn" href="https://search.naver.com/search.naver?sm=tab_hty.top&where=nexearch&ssc=tab.nx.all&query=%EC%9B%94%EB%93%9C%EC%BB%B5+3%EC%9C%84+%EC%88%9C%EC%9C%84" target="_blank" style="text-decoration:none;">🏆 <span class="txt-long">각 조 </span>3위 순위<span class="txt-long"> 확인</span> <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-left:2px;margin-bottom:1px;"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>
   </div>
 </div>
 
