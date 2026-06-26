@@ -814,8 +814,18 @@
     <span class="toggle-state" id="autoState">ON</span>
   </div>
   <button class="btn primary" onclick="fetchAll()">🔄 지금 새로고침</button>
+  <button class="btn" onclick="runDebug()" style="border-color:#f59e0b;color:#f59e0b;background:#fffbeb;">🔍 API 원본 확인</button>
 </div>
 
+
+<!-- 디버그 출력 -->
+<div id="debugBox" style="display:none;max-width:1200px;margin:0 auto 16px;background:#1e1e1e;color:#d4d4d4;font-family:monospace;font-size:12px;line-height:1.7;padding:16px 20px;border-radius:14px;white-space:pre-wrap;word-break:break-all;max-height:400px;overflow-y:auto;">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+    <span style="font-size:12px;font-weight:700;color:#888;">ESPN API 원본 데이터</span>
+    <button onclick="document.getElementById('debugBox').style.display='none'" style="font-size:11px;font-weight:700;padding:4px 12px;border-radius:8px;border:1px solid #555;background:#2e2e2e;color:#ccc;cursor:pointer;">✕ 닫기</button>
+  </div>
+  <div id="debugContent"></div>
+</div>
 
 <!-- 탭 바 -->
 <div class="tab-bar">
@@ -1285,6 +1295,39 @@ function fmtDate(iso){
     weekday:'short',
     hour:'numeric', minute:'2-digit', hour12:true
   });
+}
+
+// ── 디버그 ──
+async function runDebug(){
+  const box = document.getElementById('debugBox');
+  const out = document.getElementById('debugContent');
+  box.style.display = 'block';
+  out.textContent = '⏳ ESPN API 조회 중... A조 한국 경기 찾는 중
+';
+  const dates = [null,'20260619','20260620','20260621','20260622','20260623','20260624','20260625','20260626'];
+  for(const date of dates){
+    const url = date ? `https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/scoreboard?dates=${date}` : `https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/scoreboard`;
+    try {
+      const res = await fetch(url,{cache:'no-store'});
+      const data = await res.json();
+      const evs = data?.events||[];
+      if(!evs.length) continue;
+      for(const ev of evs){
+        const comp = ev?.competitions?.[0];
+        const teams = (comp?.competitors||[]).map(t=>`${t.team?.displayName}(${t.team?.abbreviation}) ${t.score}`).join(' vs ');
+        const st = comp?.status?.type?.state;
+        const done = comp?.status?.type?.completed;
+        // 한국 관련 경기만 출력
+        if(teams.toLowerCase().includes('korea')||teams.toLowerCase().includes('kor')){
+          out.textContent += `[${date||'today'}] ${teams} | ${st} ${done?'완료':''}
+`;
+        }
+      }
+    }catch(e){ out.textContent += `[${date}] 오류: ${e.message}
+`; }
+  }
+  out.textContent += '
+✅ 조회 완료';
 }
 
 // ── 응원 툴팁 표시/숨김 ──
@@ -1759,6 +1802,8 @@ async function fetchStanding() {
 
     const teams = {};
     const seenEvents = new Set();
+    // ESPN에서 한국 약자가 다를 수 있어서 추가 매핑
+    const ABBR_ALIAS = {'SKO':'KOR','PRK':'KOR','KR':'KOR'};
 
     for(const date of dates) {
       try {
@@ -1777,7 +1822,8 @@ async function fetchStanding() {
           if(competitors.length !== 2) continue;
 
           for(const side of competitors) {
-            const abbr = side?.team?.abbreviation || '';
+            let abbr = side?.team?.abbreviation || '';
+            if(ABBR_ALIAS[abbr]) abbr = ABBR_ALIAS[abbr];
             const grp = TEAM_GROUP[abbr];
             if(!grp) continue;
 
@@ -1879,7 +1925,8 @@ function renderStanding(list) {
 
   listEl.innerHTML = header + rows + `
     <div style="padding:10px 16px;font-size:11px;color:var(--text-muted);border-top:1px solid var(--border-light);">
-      🟢 진출권 (상위 8팀) &nbsp;|&nbsp; 🟠 경계선 (8위)
+      🟢 진출권 (상위 8팀) &nbsp;|&nbsp; 🟠 경계선 (8위)<br>
+      <span style="margin-top:4px;display:block;">* 순위 기준: 승점 → 골득실 → 다득점 → 페어플레이 → FIFA랭킹</span>
     </div>`;
 }
 // ─────────────────────────────────────────
