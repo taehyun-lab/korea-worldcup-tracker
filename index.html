@@ -657,7 +657,7 @@
     .standing-head-title { font-size: 14px; font-weight: 900; color: var(--text); }
     .standing-cols {
       display: grid;
-      grid-template-columns: 28px 1fr 36px 36px 36px 36px 36px 36px 40px;
+      grid-template-columns: 28px 1fr 36px 36px 36px 36px 36px 36px 36px 40px;
       gap: 0;
       padding: 8px 16px;
       font-size: 10px;
@@ -669,7 +669,7 @@
     .standing-cols .col-team { text-align: left; }
     .standing-row {
       display: grid;
-      grid-template-columns: 28px 1fr 36px 36px 36px 36px 36px 36px 40px;
+      grid-template-columns: 28px 1fr 36px 36px 36px 36px 36px 36px 36px 40px;
       gap: 0;
       padding: 10px 16px;
       border-bottom: 1px solid var(--border-light);
@@ -741,7 +741,7 @@
       .tab-btn { font-size: 13px; padding: 9px 16px; }
 
       .standing-cols,
-      .standing-row { grid-template-columns: 24px 1fr 30px 30px 30px 30px 30px 30px 34px; padding: 8px 12px; font-size: 11px; }
+      .standing-row { grid-template-columns: 24px 1fr 30px 30px 30px 30px 30px 30px 30px 34px; padding: 8px 12px; font-size: 11px; }
       .team-flag { font-size: 14px; }
       .team-name { font-size: 11px; }
       .pts-cell { font-size: 12px; }
@@ -814,18 +814,9 @@
     <span class="toggle-state" id="autoState">ON</span>
   </div>
   <button class="btn primary" onclick="fetchAll()">🔄 지금 새로고침</button>
-  <button class="btn" onclick="runDebug()" style="border-color:#f59e0b;color:#f59e0b;background:#fffbeb;">🔍 API 원본 확인</button>
 </div>
 
 
-<!-- 디버그 출력 -->
-<div id="debugBox" style="display:none;max-width:1200px;margin:0 auto 16px;background:#1e1e1e;color:#d4d4d4;font-family:monospace;font-size:12px;line-height:1.7;padding:16px 20px;border-radius:14px;white-space:pre-wrap;word-break:break-all;max-height:400px;overflow-y:auto;">
-  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
-    <span style="font-size:12px;font-weight:700;color:#888;">ESPN API 원본 데이터</span>
-    <button onclick="document.getElementById('debugBox').style.display='none'" style="font-size:11px;font-weight:700;padding:4px 12px;border-radius:8px;border:1px solid #555;background:#2e2e2e;color:#ccc;cursor:pointer;">✕ 닫기</button>
-  </div>
-  <div id="debugContent"></div>
-</div>
 
 <!-- 탭 바 -->
 <div class="tab-bar">
@@ -1295,39 +1286,6 @@ function fmtDate(iso){
     weekday:'short',
     hour:'numeric', minute:'2-digit', hour12:true
   });
-}
-
-// ── 디버그 ──
-async function runDebug(){
-  const box = document.getElementById('debugBox');
-  const out = document.getElementById('debugContent');
-  box.style.display = 'block';
-  out.textContent = '⏳ ESPN API 조회 중... A조 한국 경기 찾는 중
-';
-  const dates = [null,'20260619','20260620','20260621','20260622','20260623','20260624','20260625','20260626'];
-  for(const date of dates){
-    const url = date ? `https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/scoreboard?dates=${date}` : `https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/scoreboard`;
-    try {
-      const res = await fetch(url,{cache:'no-store'});
-      const data = await res.json();
-      const evs = data?.events||[];
-      if(!evs.length) continue;
-      for(const ev of evs){
-        const comp = ev?.competitions?.[0];
-        const teams = (comp?.competitors||[]).map(t=>`${t.team?.displayName}(${t.team?.abbreviation}) ${t.score}`).join(' vs ');
-        const st = comp?.status?.type?.state;
-        const done = comp?.status?.type?.completed;
-        // 한국 관련 경기만 출력
-        if(teams.toLowerCase().includes('korea')||teams.toLowerCase().includes('kor')){
-          out.textContent += `[${date||'today'}] ${teams} | ${st} ${done?'완료':''}
-`;
-        }
-      }
-    }catch(e){ out.textContent += `[${date}] 오류: ${e.message}
-`; }
-  }
-  out.textContent += '
-✅ 조회 완료';
 }
 
 // ── 응원 툴팁 표시/숨김 ──
@@ -1805,10 +1763,10 @@ async function fetchStanding() {
     // ESPN에서 한국 약자가 다를 수 있어서 추가 매핑
     const ABBR_ALIAS = {'SKO':'KOR','PRK':'KOR','KR':'KOR'};
 
-    for(const date of dates) {
+    await Promise.allSettled(dates.map(async date => {
       try {
         const res = await fetch(`${ESPN}?dates=${date}`, {cache:'no-store'});
-        if(!res.ok) continue;
+        if(!res.ok) return;
         const data = await res.json();
 
         for(const ev of (data?.events||[])) {
@@ -1836,7 +1794,8 @@ async function fetchStanding() {
               name: TEAM_KO[abbr] || side?.team?.displayName || '',
               group: grp,
               logo: 'https://a.espncdn.com/i/teamlogos/countries/500/' + abbr.toLowerCase() + '.png',
-              gp:0, w:0, d:0, l:0, gf:0, ga:0, pts:0
+              gp:0, w:0, d:0, l:0, gf:0, ga:0, pts:0,
+              yellowCards:0, redCards:0, yellowRedCards:0  // 페어플레이용
             };
             const t = teams[abbr];
             t.gp++;
@@ -1845,10 +1804,31 @@ async function fetchStanding() {
             if(side.winner === true)      { t.w++; t.pts += 3; }
             else if(opp?.winner === true) { t.l++; }
             else                          { t.d++; t.pts += 1; }
+
+            // ── 페어플레이 카드 파싱 ──
+            // ESPN statistics 배열에서 카드 데이터 추출 (필드명 방어적으로 탐색)
+            const stats = side?.statistics || [];
+            const findStat = (...names) => {
+              for(const name of names) {
+                const s = stats.find(s => (s.name||'').toLowerCase() === name.toLowerCase());
+                if(s) return Number(s.displayValue ?? s.value ?? 0);
+              }
+              return 0;
+            };
+            const yc  = findStat('yellowCards','yellowcards','yellow cards','YC');
+            const rc  = findStat('redCards','redcards','red cards','RC');
+            const yrc = findStat('yellowRedCards','yellowredcards','yellow red cards','YRC');
+            t.yellowCards    += yc;
+            t.redCards       += rc;
+            t.yellowRedCards += yrc;
+            // 브라우저 콘솔 확인용 — ESPN이 어떤 필드명 쓰는지 첫 경기만 출력
+            if(t.gp === 1 && stats.length > 0) {
+              console.log(`[카드디버그] ${abbr} stats 필드:`, stats.map(s => s.name));
+            }
           }
         }
       } catch(e) {}
-    }
+    }));
 
     // 각 조 3위 추출
     const byGroup = {};
@@ -1872,7 +1852,17 @@ async function fetchStanding() {
       return;
     }
 
-    thirdPlaces.sort((a,b)=>(b.pts-a.pts)||(b.gd-a.gd)||(b.gf-a.gf));
+    // ── FIFA 공식 조 3위 순위 결정 기준 ──
+    // 1. 승점  2. 골득실  3. 다득점  4. 페어플레이(TCS)  5. (FIFA랭킹 — 현재 미지원)
+    // TCS: 옐로카드 -1, 옐로+레드(YRC) -3, 레드카드(직접) -3
+    const calcTCS = t => -(t.yellowCards * 1 + t.yellowRedCards * 3 + t.redCards * 3);
+
+    thirdPlaces.sort((a,b) =>
+      (b.pts - a.pts) ||
+      (b.gd  - a.gd)  ||
+      (b.gf  - a.gf)  ||
+      (calcTCS(b) - calcTCS(a)) // TCS: 점수 낮을수록(덜 받을수록) 유리 → b-a 반전
+    );
     standingCache = thirdPlaces;
     renderStanding(thirdPlaces);
 
@@ -1891,7 +1881,7 @@ function renderStanding(list) {
       <div></div>
       <div class="col-team">팀</div>
       <div>경기</div><div>승</div><div>무</div><div>패</div>
-      <div>득점</div><div>실점</div><div>승점</div>
+      <div>득점</div><div>실점</div><div>TCS</div><div>승점</div>
     </div>`;
 
   const rows = list.map((t,i) => {
@@ -1919,6 +1909,9 @@ function renderStanding(list) {
       </div>
       <div>${t.gp}</div><div>${t.w}</div><div>${t.d}</div><div>${t.l}</div>
       <div>${t.gf}</div><div>${t.ga}</div>
+      <div style="font-size:11px;color:${(t.yellowCards||0)+(t.redCards||0)+(t.yellowRedCards||0)>0?'var(--orange)':'var(--text-muted)'}">
+        ${-(t.yellowCards||0)-(t.yellowRedCards||0)*3-(t.redCards||0)*3 || '—'}
+      </div>
       <div class="pts-cell">${t.pts}</div>
     </div>`;
   }).join('');
@@ -1926,7 +1919,8 @@ function renderStanding(list) {
   listEl.innerHTML = header + rows + `
     <div style="padding:10px 16px;font-size:11px;color:var(--text-muted);border-top:1px solid var(--border-light);">
       🟢 진출권 (상위 8팀) &nbsp;|&nbsp; 🟠 경계선 (8위)<br>
-      <span style="margin-top:4px;display:block;">* 순위 기준: 승점 → 골득실 → 다득점 → 페어플레이 → FIFA랭킹</span>
+      <span style="margin-top:4px;display:block;">* 순위 기준: 승점 → 골득실 → 다득점 → TCS(페어플레이) → FIFA랭킹</span>
+      <span style="margin-top:2px;display:block;color:var(--text-muted);">† TCS는 ESPN이 카드 데이터를 제공할 때만 반영 (콘솔에서 [카드디버그] 확인)</span>
     </div>`;
 }
 // ─────────────────────────────────────────
