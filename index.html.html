@@ -1,0 +1,1897 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>🇰🇷 한국 월드컵 32강 킹우의 수</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap');
+
+    :root {
+      --bg: #f5f6f8;
+      --surface: #ffffff;
+      --border: #f0f2f5;
+      --border-md: #e4e8ee;
+      --text: #191f28;
+      --text-sub: #8b95a1;
+      --text-muted: #c0c8d0;
+      --accent: #3182f6;
+      --accent-bg: #f0f5ff;
+      --green: #00b493;
+      --green-bg: #edfaf6;
+      --red: #f04452;
+      --red-bg: #fff3f3;
+      --orange: #ff6b35;
+      --orange-bg: #fff5f0;
+      --yellow: #f5a623;
+      --yellow-bg: #fffbf0;
+      --shadow-xs: 0 1px 4px rgba(0,0,0,0.05);
+      --shadow-sm: 0 2px 8px rgba(0,0,0,0.06);
+      --shadow-md: 0 4px 20px rgba(0,0,0,0.07);
+      --r-lg: 20px;
+      --r-md: 14px;
+      --r-sm: 10px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Noto Sans KR', -apple-system, system-ui, sans-serif;
+      min-height: 100vh;
+      padding: 28px 20px 64px;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── 확률 헤더 ── */
+    .prob-header {
+      max-width: 1200px;
+      margin: 0 auto 14px;
+      background: linear-gradient(135deg, #fff9f0 0%, #fff0f5 50%, #f0f5ff 100%);
+      border-radius: var(--r-lg);
+      padding: 28px 32px;
+      display: flex;
+      align-items: center;
+      gap: 28px;
+      box-shadow: var(--shadow-md);
+      position: relative;
+      overflow: hidden;
+      color: var(--text);
+    }
+    #particleCanvas {
+      position: absolute;
+      inset: 0;
+      width: 100%; height: 100%;
+      pointer-events: none;
+    }
+    .prob-header > * { position: relative; z-index: 1; }
+
+    .prob-flag { font-size: 52px; line-height: 1; flex-shrink: 0; }
+    .prob-main { flex: 1; }
+
+    .prob-label {
+      font-size: 11px;
+      font-weight: 700;
+      color: #7c8fa8;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+    .prob-number {
+      font-size: clamp(48px, 6vw, 76px);
+      font-weight: 900;
+      line-height: 1;
+      letter-spacing: -0.04em;
+      transition: color 0.3s;
+    }
+    .prob-number.low  { color: var(--red); }
+    .prob-number.mid  { color: var(--orange); }
+    .prob-number.high { color: var(--green); }
+
+    .prob-sub { margin-top: 6px; font-size: 13px; color: #5a6a7e; font-weight: 500; line-height: 1.5; }
+    .prob-sub strong { color: var(--text); font-weight: 700; }
+
+    .prob-right { display: flex; flex-direction: column; gap: 12px; align-items: flex-end; }
+    .prob-bar-wrap { width: 220px; }
+    .prob-bar-bg {
+      height: 6px;
+      background: rgba(0,0,0,0.07);
+      border-radius: 999px;
+      overflow: hidden;
+      margin-bottom: 8px;
+    }
+    .prob-bar-fill {
+      height: 100%;
+      border-radius: 999px;
+      transition: width 0.5s cubic-bezier(.4,0,.2,1), background 0.3s;
+    }
+    .prob-bar-fill.low  { background: var(--red); }
+    .prob-bar-fill.mid  { background: var(--orange); }
+    .prob-bar-fill.high { background: var(--green); }
+
+    .prob-stats {
+      display: flex;
+      gap: 10px;
+      font-size: 12px;
+      font-weight: 700;
+      color: #7c8fa8;
+    }
+    .stat-s { color: var(--green); }
+    .stat-f { color: var(--red); }
+
+    .need-badge {
+      background: rgba(255,255,255,0.7);
+      border: 1.5px solid #fad791;
+      border-radius: var(--r-sm);
+      padding: 10px 16px;
+      text-align: center;
+      flex-shrink: 0;
+      backdrop-filter: blur(8px);
+    }
+    .need-num {
+      font-size: 28px;
+      font-weight: 900;
+      color: #ffd740;
+      line-height: 1;
+      letter-spacing: -0.03em;
+    }
+    .need-label { font-size: 10px; color: #5a6a7e; font-weight: 700; margin-top: 2px; }
+
+    /* ── API 바 ── */
+    .api-bar {
+      max-width: 1200px;
+      margin: 0 auto 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .api-text {
+      flex: 1;
+      font-size: 12px;
+      color: var(--text-muted);
+      min-width: 200px;
+      font-weight: 500;
+    }
+    .api-text.loading { color: var(--orange); }
+    .api-text.ok      { color: var(--green); }
+    .api-text.err     { color: var(--red); }
+
+    .btn {
+      font-size: 12px;
+      font-weight: 700;
+      padding: 0 16px;
+      height: 36px;
+      border-radius: var(--r-sm);
+      border: 1.5px solid var(--border-md);
+      background: var(--surface);
+      color: var(--text-sub);
+      cursor: pointer;
+      transition: all 0.15s;
+      white-space: nowrap;
+      display: inline-flex;
+      align-items: center;
+      box-shadow: var(--shadow-xs);
+    }
+    .btn:hover { border-color: #d0d5dd; background: #fafbfc; color: var(--text); }
+    .btn.primary { border-color: #b3d0ff; background: var(--accent-bg); color: var(--accent); }
+    .btn.primary:hover { background: #dde9ff; }
+    .btn.active { border-color: #a3e0d3; background: var(--green-bg); color: var(--green); }
+
+    /* 토글 스위치 */
+    .toggle-wrap {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      padding: 8px 16px;
+      border-radius: 10px;
+      border: 1.5px solid var(--border-md);
+      background: var(--surface);
+      box-shadow: var(--shadow-xs);
+      transition: all 0.15s;
+      height: 36px;
+      box-sizing: border-box;
+    }
+    .toggle-wrap:hover { border-color: #c9d1d9; background: #f8f9fa; }
+    .toggle-label {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-sub);
+      white-space: nowrap;
+      user-select: none;
+    }
+    .toggle-switch {
+      position: relative;
+      width: 44px;
+      height: 24px;
+      flex-shrink: 0;
+    }
+    .toggle-switch input { display: none; }
+    .toggle-track {
+      position: absolute;
+      inset: 0;
+      border-radius: 999px;
+      background: var(--border-md);
+      transition: background 0.2s;
+      cursor: pointer;
+    }
+    .toggle-thumb {
+      position: absolute;
+      top: 3px; left: 3px;
+      width: 18px; height: 18px;
+      border-radius: 50%;
+      background: #fff;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.15);
+      transition: transform 0.2s;
+    }
+    .toggle-switch.on .toggle-track { background: var(--green); }
+    .toggle-switch.on .toggle-thumb { transform: translateX(20px); }
+    .toggle-state {
+      font-size: 11px;
+      font-weight: 900;
+      color: var(--green);
+      min-width: 20px;
+      user-select: none;
+    }
+    .toggle-wrap:has(.toggle-switch:not(.on)) .toggle-state { color: var(--text-muted); }
+
+    /* ── 메인 그리드 ── */
+    .main-grid {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+    /* ── 패널 ── */
+    .panel {
+      background: var(--surface);
+      border-radius: var(--r-lg);
+      overflow: hidden;
+      box-shadow: var(--shadow-sm);
+    }
+    .panel-head {
+      padding: 16px 20px;
+      border-bottom: 1.5px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #fafbff;
+    }
+    .panel-title {
+      font-size: 14px;
+      font-weight: 900;
+      color: var(--text);
+      letter-spacing: -0.02em;
+    }
+    .panel-badge {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 10px;
+      border-radius: 999px;
+      background: var(--border);
+      color: var(--text-sub);
+    }
+    .panel-badge.live {
+      background: var(--red-bg);
+      color: var(--red);
+      animation: pulse 1.4s infinite;
+    }
+
+    @keyframes pulse   { 0%,100%{opacity:1} 50%{opacity:0.45} }
+
+    .info-wrap {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      position: relative;
+    }
+    .info-icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 16px; height: 16px;
+      border-radius: 50%;
+      background: rgba(91,115,140,0.2);
+      color: #5a6a7e;
+      font-size: 10px;
+      font-weight: 900;
+      cursor: pointer;
+      flex-shrink: 0;
+      line-height: 1;
+      font-style: normal;
+    }
+    .info-tooltip {
+      display: none;
+      position: fixed;
+      background: #1e2a3a;
+      color: #f0f4ff;
+      border-radius: 12px;
+      padding: 12px 14px;
+      font-size: 12px;
+      font-weight: 500;
+      line-height: 1.8;
+      white-space: nowrap;
+      z-index: 9999;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+      pointer-events: none;
+    }
+    .info-tooltip::before {
+      content: '';
+      position: absolute;
+      border: 6px solid transparent;
+    }
+    .info-tooltip[data-dir="right"]::before {
+      top: 50%;
+      right: 100%;
+      transform: translateY(-50%);
+      border-right-color: #1e2a3a;
+    }
+    .info-tooltip[data-dir="up"]::before {
+      top: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      border-top-color: #1e2a3a;
+    }
+
+    @keyframes fadeout { 0%{opacity:1} 70%{opacity:1} 100%{opacity:0} }
+
+    /* ── UP 라벨 ── */
+    .update-label {
+      display: inline-flex;
+      align-items: center;
+      font-size: 10px;
+      font-weight: 700;
+      color: #fff;
+      background: var(--accent);
+      border-radius: 5px;
+      padding: 2px 6px;
+      animation: fadeout 10s forwards;
+      flex-shrink: 0;
+    }
+
+    /* ── LIVE 뱃지 ── */
+    .live-ping {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--red);
+      background: var(--red-bg);
+      border-radius: 999px;
+      padding: 2px 7px;
+      animation: pulse 1.4s infinite;
+    }
+    .live-ping::before {
+      content: '';
+      width: 5px; height: 5px;
+      border-radius: 50%;
+      background: var(--red);
+      flex-shrink: 0;
+    }
+
+    /* ── 치치직 버튼 ── */
+    .live-watch-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 11px;
+      font-weight: 700;
+      color: #03c75a;
+      background: #f0fff8;
+      border: 1.5px solid #a3e8c4;
+      border-radius: var(--r-sm);
+      padding: 4px 10px;
+      text-decoration: none;
+      white-space: nowrap;
+      flex-shrink: 0;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .live-watch-btn:hover { background: #d4f7e7; border-color: #03c75a; }
+
+    /* ── 경기 아이템 ── */
+    .match-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 13px 20px;
+      border-bottom: 1px solid var(--border);
+      transition: background 0.1s;
+    }
+    .match-item:last-child { border-bottom: none; }
+    .match-item:hover { background: #fafbfc; }
+
+    .match-item.is-done { background: #fafbfc; }
+    .match-item.is-done .match-name { color: var(--text-sub); }
+    .match-item.is-done .match-condition { color: var(--text-muted); }
+    .match-item.is-done:hover { background: #f5f6f8; }
+
+    .match-item.is-live {
+      background: #fff8f8;
+      border-left: 3px solid var(--red);
+      padding-left: 17px;
+    }
+    .match-item.is-live:hover { background: #fff0f0; }
+    .match-item.is-soon {
+      border-left: 3px solid var(--orange);
+      padding-left: 17px;
+      background: #fffaf5;
+      animation: borderPulse 1.5s ease-in-out infinite;
+    }
+    .match-item.is-soon:hover { background: #fff5ec; }
+    @keyframes borderPulse {
+      0%,100% { border-left-color: var(--orange); box-shadow: inset 3px 0 0 var(--orange); }
+      50%      { border-left-color: #ffb347;       box-shadow: inset 3px 0 0 #ffb347; }
+    }
+    .soon-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--orange);
+      background: var(--orange-bg);
+      border-radius: 999px;
+      padding: 2px 7px;
+      white-space: nowrap;
+      flex-shrink: 0;
+      animation: pulse 1.5s infinite;
+    }
+
+    .match-group {
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--accent);
+      width: 26px;
+      flex-shrink: 0;
+      text-align: center;
+      background: var(--accent-bg);
+      border-radius: 6px;
+      padding: 2px 0;
+    }
+    .match-teams { flex: 1; min-width: 0; }
+    .match-name {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .match-condition {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 2px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      font-weight: 500;
+    }
+    .match-date {
+      font-size: 10px;
+      color: var(--accent);
+      font-weight: 700;
+      margin-top: 3px;
+    }
+    /* 응원 툴팁 */
+    .cheer-tooltip {
+      display: none;
+      position: fixed;
+      background: #fffdf5;
+      border: 1.5px solid #f0e6c8;
+      border-radius: 14px;
+      padding: 14px 16px;
+      font-size: 12px;
+      line-height: 1.7;
+      z-index: 9999;
+      box-shadow: 0 8px 28px rgba(0,0,0,0.12);
+      max-width: 280px;
+      pointer-events: none;
+    }
+    .cheer-tooltip-title {
+      font-size: 12px;
+      font-weight: 900;
+      color: var(--text);
+      margin-bottom: 8px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+    .cheer-line {
+      margin-bottom: 6px;
+    }
+    .cheer-line:last-child { margin-bottom: 0; }
+    .cheer-text {
+      font-weight: 700;
+      color: var(--text);
+      font-size: 12px;
+    }
+    .cheer-pron {
+      color: var(--text-sub);
+      font-size: 11px;
+    }
+    .cheer-mean {
+      color: var(--accent);
+      font-size: 11px;
+      font-weight: 700;
+    }
+    .match-score-col { text-align: right; flex-shrink: 0; }
+    .score-big {
+      font-size: 17px;
+      font-weight: 900;
+      letter-spacing: -0.02em;
+      line-height: 1;
+    }
+    .score-big.live { color: var(--red); }
+    .score-big.done { color: var(--text); }
+    .score-big.pre  { color: var(--text-muted); }
+
+    .score-status-tag {
+      font-size: 10px;
+      font-weight: 700;
+      margin-top: 3px;
+      color: var(--text-muted);
+    }
+    .score-status-tag.live { color: var(--red); }
+    .score-status-tag.done { color: var(--green); }
+
+    .result-dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .result-dot.success { background: var(--green); }
+    .result-dot.fail    { background: var(--red); }
+    .result-dot.partial { background: var(--orange); }
+    .result-dot.wait    { background: var(--border-md); }
+
+    /* ── 체크리스트 ── */
+    .check-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 13px 20px;
+      border-bottom: 1px solid var(--border);
+      transition: background 0.1s;
+    }
+    .check-item:last-child { border-bottom: none; }
+    .check-item:hover { background: #fafbfc; }
+
+    .check-icon {
+      width: 26px; height: 26px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+    .check-icon.success { background: var(--green-bg); }
+    .check-icon.fail    { background: var(--red-bg); }
+    .check-icon.wait    { background: var(--border); }
+    .check-icon.partial { background: var(--orange-bg); }
+
+    .check-body { flex: 1; min-width: 0; }
+    .check-group {
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--accent);
+      letter-spacing: 0.04em;
+    }
+    .check-title { font-size: 12px; font-weight: 700; line-height: 1.45; color: var(--text); }
+    .check-desc  {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 2px;
+      line-height: 1.4;
+      font-weight: 500;
+    }
+    .check-desc.success { color: var(--green); }
+    .check-desc.fail    { color: var(--red); }
+
+    .check-tag {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 9px;
+      border-radius: 999px;
+      flex-shrink: 0;
+      margin-top: 3px;
+      align-self: flex-start;
+    }
+    .check-tag.success { background: var(--green-bg);  color: var(--green); }
+    .check-tag.fail    { background: var(--red-bg);    color: var(--red); }
+    .check-tag.wait    { background: var(--border);    color: var(--text-sub); }
+    .check-tag.partial { background: var(--orange-bg); color: var(--orange); }
+
+    /* ── 탭 ── */
+    .tab-bar {
+      max-width: 1200px;
+      margin: 0 auto 14px;
+      display: flex;
+      gap: 0;
+      border-bottom: 2px solid var(--border);
+    }
+    .tab-btn {
+      padding: 10px 24px;
+      border: none;
+      border-bottom: 3px solid transparent;
+      margin-bottom: -2px;
+      background: transparent;
+      color: var(--text-muted);
+      font-size: 14px;
+      font-weight: 700;
+      font-family: 'Noto Sans KR', sans-serif;
+      cursor: pointer;
+      transition: all 0.18s;
+    }
+    .tab-btn.active {
+      color: var(--accent);
+      border-bottom-color: var(--accent);
+    }
+    .tab-btn:hover:not(.active) { color: var(--text-sub); }
+
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
+    /* ── 3위 순위표 ── */
+    .standing-table {
+      max-width: 1200px;
+      margin: 0 auto;
+      background: var(--surface);
+      border-radius: var(--r-lg);
+      overflow: hidden;
+      box-shadow: var(--shadow-sm);
+    }
+    .standing-head {
+      padding: 16px 20px;
+      border-bottom: 1.5px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #fafbff;
+    }
+    .standing-head-title { font-size: 14px; font-weight: 900; color: var(--text); }
+    .standing-cols {
+      display: grid;
+      grid-template-columns: 28px 1fr 36px 36px 36px 36px 36px 36px 40px;
+      gap: 0;
+      padding: 8px 16px;
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--border);
+      text-align: center;
+    }
+    .standing-cols .col-team { text-align: left; }
+    .standing-row {
+      display: grid;
+      grid-template-columns: 28px 1fr 36px 36px 36px 36px 36px 36px 40px;
+      gap: 0;
+      padding: 10px 16px;
+      border-bottom: 1px solid var(--border-light);
+      align-items: center;
+      font-size: 12px;
+      text-align: center;
+      transition: background 0.1s;
+    }
+    .standing-row:last-child { border-bottom: none; }
+    .standing-row:hover { background: #fafbfc; }
+    .standing-row.is-korea {
+      background: #fff0f0;
+      font-weight: 700;
+    }
+    .standing-row.is-korea:hover { background: #ffe8e8; }
+    .standing-row.qualify { border-left: 3px solid var(--green); }
+    .standing-row.border-line { border-left: 3px solid var(--orange); }
+    .rank-num {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-muted);
+    }
+    .rank-num.top { color: var(--green); }
+    .rank-num.border { color: var(--orange); }
+    .team-name-cell {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      text-align: left;
+    }
+    .team-flag { font-size: 16px; }
+    .team-name { font-size: 12px; font-weight: 700; color: var(--text); }
+    .pts-cell { font-weight: 900; color: var(--text); font-size: 13px; }
+    .gd-cell { font-size: 11px; }
+    .gd-pos { color: var(--green); font-weight: 700; }
+    .gd-neg { color: var(--red); font-weight: 700; }
+    .standing-loading {
+      padding: 40px;
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 13px;
+    }
+
+    /* ── 모바일 ── */
+    @media (max-width: 820px) {
+      body { padding: 16px 14px 72px; }
+
+      .prob-header {
+        flex-direction: column;
+        gap: 16px;
+        align-items: flex-start;
+        padding: 22px 18px;
+        border-radius: var(--r-lg);
+        margin-bottom: 12px;
+      }
+      .prob-flag   { font-size: 40px; }
+      .prob-number { font-size: 54px; }
+      .prob-label  { font-size: 11px; }
+      .prob-sub    { font-size: 12px; }
+      .prob-right  { flex-direction: row; align-items: flex-start; gap: 12px; width: 100%; }
+      .prob-bar-wrap { flex: 1; }
+      .need-badge  { padding: 8px 14px; }
+      .need-num    { font-size: 24px; }
+
+      .api-bar { gap: 6px; }
+      .btn { font-size: 11px; padding: 7px 12px; }
+
+      .tab-bar { margin-bottom: 12px; }
+      .tab-btn { font-size: 13px; padding: 9px 16px; }
+
+      .standing-cols,
+      .standing-row { grid-template-columns: 24px 1fr 30px 30px 30px 30px 30px 30px 34px; padding: 8px 12px; font-size: 11px; }
+      .team-flag { font-size: 14px; }
+      .team-name { font-size: 11px; }
+      .pts-cell { font-size: 12px; }
+
+      .main-grid { grid-template-columns: 1fr; gap: 12px; }
+
+      .match-item  { padding: 10px 14px; gap: 8px; }
+      .match-item.is-live { padding-left: 11px; }
+      .match-group { width: 22px; font-size: 9px; }
+      .match-name  { font-size: 12px; }
+      .match-condition { font-size: 10px; }
+      .match-date  { font-size: 10px; }
+      .score-big   { font-size: 15px; }
+      .score-status-tag { font-size: 9px; }
+      .live-ping   { font-size: 9px; padding: 1px 5px; }
+      .live-watch-btn { font-size: 10px; padding: 3px 7px; }
+
+      .check-item  { padding: 10px 14px; gap: 8px; }
+      .check-icon  { width: 24px; height: 24px; font-size: 12px; }
+      .check-title { font-size: 11px; }
+      .check-desc  { font-size: 10px; }
+      .check-tag   { font-size: 10px; padding: 2px 7px; }
+      .check-group { font-size: 9px; }
+
+      .panel-head  { padding: 12px 14px; }
+      .panel-title { font-size: 13px; }
+      .panel-badge { font-size: 10px; padding: 2px 8px; }
+      .result-dot  { width: 6px; height: 6px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- 확률 헤더 -->
+<div class="prob-header">
+  <canvas id="particleCanvas"></canvas>
+  <div class="prob-flag">🇰🇷</div>
+  <div class="prob-main">
+    <div class="prob-label">32강 진출 가능성</div>
+    <div class="prob-number low" id="probNum">0%</div>
+    <div class="prob-sub" id="probSub">불러오는 중...</div>
+  </div>
+  <div class="prob-right">
+    <div class="prob-bar-wrap">
+      <div class="prob-bar-bg">
+        <div class="prob-bar-fill low" id="probBar" style="width:0%"></div>
+      </div>
+      <div class="prob-stats">
+        <span>✅ <span class="stat-s" id="cntS">0</span></span>
+        <span>❌ <span class="stat-f" id="cntF">0</span></span>
+        <span>⏳ <span id="cntW">0</span></span>
+      </div>
+    </div>
+    <div class="need-badge">
+      <div class="need-num" id="needMore">4</div>
+      <div class="need-label">더 필요</div>
+    </div>
+  </div>
+</div>
+
+<!-- API 상태 바 -->
+<div class="api-bar">
+  <div class="api-text" id="apiText">⏳ ESPN 데이터 불러오는 중...</div>
+  <div class="toggle-wrap" onclick="toggleAuto()">
+    <span class="toggle-label">자동갱신(1분)</span>
+    <div class="toggle-switch" id="autoBtn">
+      <div class="toggle-track"></div>
+      <div class="toggle-thumb"></div>
+    </div>
+    <span class="toggle-state" id="autoState">ON</span>
+  </div>
+  <button class="btn primary" onclick="fetchAll()">🔄 지금 새로고침</button>
+</div>
+
+
+<!-- 탭 바 -->
+<div class="tab-bar">
+  <button class="tab-btn active" onclick="switchTab('cases')">📋 경우의 수</button>
+  <button class="tab-btn" onclick="switchTab('standing')">🏆 각 조 3위 팀 순위</button>
+</div>
+
+<!-- 탭1: 경우의 수 -->
+<div class="tab-content active" id="tab-cases">
+  <div class="main-grid">
+    <div class="panel">
+      <div class="panel-head">
+        <div class="panel-title">⚽ 경기 일정 · 실시간 스코어</div>
+        <div class="panel-badge" id="liveBadge">대기중</div>
+      </div>
+      <div id="scheduleList"></div>
+    </div>
+    <div class="panel">
+      <div class="panel-head">
+        <div class="panel-title">📋 조건 체크리스트</div>
+        <div class="panel-badge" id="checkBadge">0 / 11</div>
+      </div>
+      <div id="checkList"></div>
+    </div>
+  </div>
+</div>
+
+<!-- 탭2: 3위 순위 -->
+<div class="tab-content" id="tab-standing">
+  <div class="standing-table">
+    <div class="standing-head">
+      <div class="standing-head-title">🏆 각 조 3위 팀 순위</div>
+      <div class="panel-badge" id="standingBadge">불러오는 중</div>
+    </div>
+    <div id="standingList"><div class="standing-loading">⏳ 데이터 불러오는 중...</div></div>
+  </div>
+</div>
+
+<script>
+// ─────────────────────────────────────────
+// 조건 정의
+// ─────────────────────────────────────────
+const CONDITIONS = [
+  {
+    // 보스니아 3:1 카타르 종료 → 실패 확정
+    id:'B', group:'B조', match:'보스니아 vs 카타르', need:'무승부 필요 → 보스니아 3:1 승 (실패 확정)',
+    espnA:['bosnia','bih','bos'], espnB:['qatar','qat'],
+    dates:['20260622','20260623','20260624','20260625','20260626','20260627'],
+    check:(a,b,st)=>'fail'
+  },
+  {
+    // 브라질 3:0 스코틀랜드 종료 → 성공 확정
+    id:'C', group:'C조', match:'브라질 vs 스코틀랜드', need:'브라질 승 → 브라질 3:0 승 (성공 확정)',
+    espnA:['brazil','bra'], espnB:['scotland','sco'],
+    dates:['20260622','20260623','20260624','20260625','20260626','20260627'],
+    check:(a,b,st)=>'success'
+  },
+  {
+    // 파라과이 vs 호주 예정 (a=파라과이, b=호주)
+    id:'D', group:'D조', match:'파라과이 vs 호주', need:'호주 승 or 파라과이 대승 (2골+ 차이)',
+    espnA:['paraguay','par'], espnB:['australia','aus'],
+    dates:['20260625','20260626','20260627','20260628','20260629'],
+    check:(a,b,st) => {
+      if(st==='pre') return 'wait';
+      const done = st==='done'||st==='post';
+      if(done) return (b>a || a-b>=2)?'success':'fail';
+      return (b>a || a-b>=2)?'partial':'wait';
+    }
+  },
+  {
+    // 에콰도르 2:1 독일 종료 → 실패 확정
+    id:'E', group:'E조', match:'에콰도르 vs 독일', need:'독일 승·무 필요 → 에콰도르 2:1 승 (실패 확정)',
+    espnA:['ecuador','ecu'], espnB:['germany','ger'],
+    dates:['20260624','20260625','20260626','20260627','20260628'],
+    check:(a,b,st)=>'fail'
+  },
+
+  {
+    // 일본 vs 스웨덴 진행 중 (a=일본, b=스웨덴)
+    id:'F', group:'F조', match:'일본 vs 스웨덴', need:'일본 대승 (2골+ 차이)',
+    espnA:['japan','jpn'], espnB:['sweden','swe'],
+    dates:['20260625','20260626','20260627','20260628','20260629'],
+    check:(a,b,st) => {
+      if(st==='pre') return 'wait';
+      const done = st==='done'||st==='post';
+      if(done) return (a-b>=2)?'success':'fail';
+      return (a-b>=2)?'partial':'wait';
+    }
+  },
+  {
+    // 이집트 vs 이란 예정
+    id:'G', group:'G조', match:'이집트 vs 이란', need:'이집트 승',
+    espnA:['egypt','egy'], espnB:['iran','iri','irn'],
+    dates:['20260625','20260626','20260627','20260628','20260629'],
+    check:(a,b,st) => {
+      if(st==='pre') return 'wait';
+      const done = st==='done'||st==='post';
+      if(done) return a>b?'success':'fail';
+      return a>b?'partial':'wait';
+    }
+  },
+  {
+    // 우루과이 vs 스페인 예정 (a=우루과이, b=스페인)
+    id:'H', group:'H조', match:'우루과이 vs 스페인', need:'스페인 승',
+    espnA:['uruguay','uru'], espnB:['spain','esp'],
+    dates:['20260625','20260626','20260627','20260628','20260629'],
+    check:(a,b,st) => {
+      if(st==='pre') return 'wait';
+      const done = st==='done'||st==='post';
+      if(done) return b>a?'success':'fail';
+      return b>a?'partial':'wait';
+    }
+  },
+  {
+    // 세네갈 vs 이라크 예정 (a=세네갈, b=이라크)
+    id:'I', group:'I조', match:'세네갈 vs 이라크', need:'무승부 or 이라크 승 or 세네갈 1골차 승',
+    espnA:['senegal','sen'], espnB:['iraq','irq'],
+    dates:['20260625','20260626','20260627','20260628','20260629'],
+    check:(a,b,st) => {
+      if(st==='pre') return 'wait';
+      const done = st==='done'||st==='post';
+      if(done) {
+        if(a===b) return 'success';        // 무승부 → success
+        if(b>a) return 'success';          // 이라크 승 → success
+        if(a-b===1) return 'success';      // 세네갈 1골차 → success (응원 전환)
+        return 'fail';                     // 세네갈 2골차 이상 → fail
+      }
+      // 진행중
+      if(a===b||b>a) return 'partial';
+      if(a-b===1) return 'partial';
+      return 'wait';
+    }
+  },
+  {
+    // 알제리 vs 오스트리아 예정 (a=알제리, b=오스트리아)
+    id:'J', group:'J조', match:'알제리 vs 오스트리아', need:'오스트리아 승 or 알제리 대승 (2골+ 차이)',
+    espnA:['algeria','alg'], espnB:['austria','aut'],
+    dates:['20260625','20260626','20260627','20260628','20260629','20260630'],
+    check:(a,b,st) => {
+      if(st==='pre') return 'wait';
+      const done = st==='done'||st==='post';
+      if(done) return (b>a || a-b>=2)?'success':'fail';
+      return (b>a || a-b>=2)?'partial':'wait';
+    }
+  },
+  {
+    // 콩고DR vs 우즈베키스탄 예정 (a=콩고DR, b=우즈베키스탄)
+    id:'K', group:'K조', match:'콩고DR vs 우즈베키스탄', need:'무승부 or 우즈벡 승',
+    espnA:['congo','cod','democratic republic','dr congo'], espnB:['uzbekistan','uzb'],
+    dates:['20260625','20260626','20260627','20260628','20260629','20260630'],
+    check:(a,b,st) => {
+      if(st==='pre') return 'wait';
+      const done = st==='done'||st==='post';
+      if(done) return (a===b||b>a)?'success':'fail';
+      return (a===b||b>a)?'partial':'wait';
+    }
+  },
+  {
+    // 크로아티아 vs 가나 예정 (a=크로아티아, b=가나)
+    id:'L', group:'L조', match:'크로아티아 vs 가나', need:'가나 승',
+    espnA:['croatia','cro'], espnB:['ghana','gha'],
+    dates:['20260625','20260626','20260627','20260628','20260629','20260630'],
+    check:(a,b,st) => {
+      if(st==='pre') return 'wait';
+      const done = st==='done'||st==='post';
+      if(done) return b>a?'success':'fail';
+      return b>a?'partial':'wait';
+    }
+  }
+];
+
+// ─────────────────────────────────────────
+// 상태 초기화
+// ─────────────────────────────────────────
+// ── 응원 문구 데이터 ──
+const CHEERS = {
+  F: {
+    default: {
+      title: '일본을 응원해야 합니다',
+      lines: [
+        { text: '日本、がんばれ！', pron: '니혼, 간바레!', mean: '일본, 힘내라!' },
+        { text: 'サムライブルー、行け！', pron: '사무라이 부루우, 이케!', mean: '사무라이 블루, 가자!' },
+      ]
+    }
+  },
+  G: {
+    default: {
+      title: '이집트를 응원해야 합니다',
+      lines: [
+        { text: 'يالمصر！', pron: '알라 마스르!', mean: '가자, 이집트!' },
+        { text: 'يالفراعنة！', pron: '알라 알파라이나!', mean: '가자, 파라오들이여!' },
+      ]
+    }
+  },
+  H: {
+    default: {
+      title: '스페인을 응원해야 합니다',
+      lines: [
+        { text: 'Vamos, España!', pron: '바모스, 에스파냐!', mean: '가자, 스페인!' },
+        { text: 'Vamos, La Roja!', pron: '바모스, 라 로하!', mean: '가자, 붉은 군단!' },
+      ]
+    }
+  },
+  I: {
+    // 세네갈(a) vs 이라크(b)
+    // 무승부 or 이라크 우세 → 중립 유지
+    // 세네갈 1골차 → 세네갈 응원
+    // 세네갈 2골차+ → 이미 실패이지만 이라크 응원
+    neutral: {
+      title: '중립을 지켜야 합니다 (무승부 유리)',
+      lines: [
+        { text: '⚖️ 무승부가 가장 유리한 상황', pron: '', mean: '골이 나오지 않길 바라세요' },
+      ]
+    },
+    senegal: {
+      title: '세네갈을 응원해야 합니다 (1골차 승)',
+      lines: [
+        { text: 'Allez, Sénégal!', pron: '알레, 세네갈!', mean: '가자, 세네갈!' },
+        { text: 'Allez les Lions!', pron: '알레 레 리옹!', mean: '가자, 사자들아!' },
+      ]
+    },
+    iraq: {
+      title: '이라크를 응원해야 합니다',
+      lines: [
+        { text: 'يللعراق!', pron: '알라 알이라크!', mean: '가자, 이라크!' },
+        { text: 'يالرافدين!', pron: '알라 우수드 알라피다인!', mean: '가자, 메소포타미아의 사자들이여!' },
+      ]
+    }
+  },
+  D: {
+    // 파라과이(a) vs 호주(b)
+    australia: {
+      title: '호주를 응원해야 합니다',
+      lines: [
+        { text: 'Aussie! Aussie! Aussie! Oi! Oi! Oi!', pron: '오지! 오지! 오지! 오이! 오이! 오이!', mean: '호주 대표 응원 구호' },
+        { text: 'Go Socceroos!', pron: '고 사커루스!', mean: '가자, 사커루스!' },
+      ]
+    },
+    paraguay: {
+      title: '파라과이를 응원해야 합니다 (2골차+ 대승)',
+      lines: [
+        { text: 'Vamos, Albirroja!', pron: '바모스, 알비로하!', mean: '가자, 알비로하!' },
+        { text: 'Vamos, Paraguay!', pron: '바모스, 파라과이!', mean: '가자, 파라과이!' },
+      ]
+    }
+  },
+  J: {
+    // 알제리(a) vs 오스트리아(b)
+    austria: {
+      title: '오스트리아를 응원해야 합니다',
+      lines: [
+        { text: "Auf geht's, Österreich!", pron: '아우프 게이츠, 외스터라이히!', mean: '가자, 오스트리아!' },
+        { text: "Auf geht's, Das Team!", pron: '아우프 게이츠, 다스 팀!', mean: '가자, 대표팀!' },
+      ]
+    },
+    algeria: {
+      title: '알제리를 응원해야 합니다 (2골차+ 대승)',
+      lines: [
+        { text: 'يالجزائر!', pron: '알라 알자자이르!', mean: '가자, 알제리!' },
+        { text: 'يالثعالب الصحراء!', pron: '알라 사알리브 앗사흐라!', mean: '가자, 사막의 여우들이여!' },
+      ]
+    }
+  },
+  K: {
+    default: {
+      title: '우즈베키스탄을 응원해야 합니다',
+      lines: [
+        { text: "Olg'a, O'zbekiston!", pron: '올가, 우즈베키스톤!', mean: '가자, 우즈베키스탄!' },
+        { text: "Olg'a, Oq bo'rilar!", pron: '올가, 오크 보릴라르!', mean: '가자, 흰 늑대들아!' },
+      ]
+    }
+  },
+  L: {
+    default: {
+      title: '가나를 응원해야 합니다',
+      lines: [
+        { text: 'Go Ghana!', pron: '고 가나!', mean: '가자, 가나!' },
+        { text: 'Go Black Stars!', pron: '고 블랙 스타즈!', mean: '가자, 블랙 스타즈!' },
+      ]
+    }
+  }
+};
+
+// 현재 스코어 기반으로 응원 데이터 결정
+function getCheer(cond, ms) {
+  const c = CHEERS[cond.id];
+  if(!c) return null;
+  const a = ms.scoreA ?? 0, b = ms.scoreB ?? 0;
+
+  if(cond.id === 'D') return (a-b >= 2) ? c.paraguay : c.australia;
+  if(cond.id === 'I') {
+    if(a-b >= 2) return c.iraq;
+    if(a-b === 1) return c.senegal;
+    return c.neutral;
+  }
+  if(cond.id === 'J') return (a-b >= 2) ? c.algeria : c.austria;
+  return c.default || null;
+}
+
+const MS = {};
+CONDITIONS.forEach(c => {
+  MS[c.id] = { scoreA:null, scoreB:null, state:'pre', clock:'', date:'', result:'wait', fetched:false, updated:false };
+});
+// E조는 복합 조건 (독일+코트디부아르 동반), 이미 결과 확정
+// B조: 보스니아 3:1 카타르 종료
+MS['B'].result = 'fail';    MS['B'].fetched = true; MS['B'].scoreA = 3; MS['B'].scoreB = 1; MS['B'].state = 'done';
+// C조: 브라질 3:0 스코틀랜드 종료
+MS['C'].result = 'success'; MS['C'].fetched = true; MS['C'].scoreA = 3; MS['C'].scoreB = 0; MS['C'].state = 'done';
+// E조: 에콰도르 2:1 독일 종료
+MS['E'].result = 'fail';    MS['E'].fetched = true; MS['E'].scoreA = 2; MS['E'].scoreB = 1; MS['E'].state = 'done';
+// ─────────────────────────────────────────
+// ESPN API fetch
+// ─────────────────────────────────────────
+const ESPN = 'https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/scoreboard';
+
+function norm(s){ return String(s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,''); }
+function matchTeam(team, keys){
+  const n = norm([team?.displayName,team?.shortDisplayName,team?.name,team?.abbreviation,team?.location].join(' '));
+  return keys.some(k=>n.includes(norm(k)));
+}
+
+// 날짜별 캐시 (같은 날짜 중복 요청 방지)
+const dateCache = {};
+
+// 오늘/어제/그제 날짜 문자열 (YYYYMMDD)
+function getRecentDates(){
+  const dates = [];
+  for(let i=0; i<=3; i++){
+    const d = new Date();
+    d.setDate(d.getDate() - i);
+    const y = d.getFullYear();
+    const m = String(d.getMonth()+1).padStart(2,'0');
+    const day = String(d.getDate()).padStart(2,'0');
+    dates.push(`${y}${m}${day}`);
+  }
+  return dates;
+}
+
+async function fetchDate(date){
+  const key = date || 'nodate';
+  if(dateCache[key]) return dateCache[key];
+  // date가 null이면 파라미터 없이 호출 (현재 진행중 경기 전체)
+  const url = date ? `${ESPN}?dates=${date}` : ESPN;
+  const res = await fetch(url, { cache:'no-store' });
+  if(!res.ok) throw new Error(`HTTP ${res.status}`);
+  const data = await res.json();
+  dateCache[key] = data;
+  return data;
+}
+
+function extractMatch(data, keysA, keysB){
+  for(const ev of (data?.events||[])){
+    for(const comp of (ev?.competitions||[])){
+      const cps = comp?.competitors||[];
+      const ca = cps.find(c=>matchTeam(c.team,keysA));
+      const cb = cps.find(c=>matchTeam(c.team,keysB));
+      if(!ca||!cb) continue;
+
+      const status  = comp?.status || ev?.status || {};
+      const type    = status?.type || {};
+      const tState  = type?.state || '';
+      const done    = type?.completed || tState==='post';
+      let state = 'pre';
+      if(done) state='done';
+      else if(tState==='in') state='live';
+
+      return {
+        scoreA: Number(ca.score??0),
+        scoreB: Number(cb.score??0),
+        state,
+        clock: status?.displayClock || type?.detail || '',
+        date: ev?.date || ''
+      };
+    }
+  }
+  return null;
+}
+
+async function fetchOne(cond){
+  // 우선순위: null(파라미터 없음) → 오늘/어제/그제 → cond.dates
+  const recentDates = getRecentDates();
+  const baseDates = [null, ...recentDates];
+  const extraDates = cond.dates.filter(d => !recentDates.includes(d));
+  const allDates = [...baseDates, ...extraDates];
+
+  for(const date of allDates){
+    try{
+      const data  = await fetchDate(date);
+      const match = extractMatch(data, cond.espnA, cond.espnB);
+      if(match){
+        const ms = MS[cond.id];
+        // 이전값과 비교해서 변경 감지
+        const prevA = ms.scoreA, prevB = ms.scoreB, prevState = ms.state;
+        const changed = ms.fetched && (
+          prevA !== match.scoreA ||
+          prevB !== match.scoreB ||
+          prevState !== match.state
+        );
+        ms.scoreA  = match.scoreA;
+        ms.scoreB  = match.scoreB;
+        ms.state   = match.state;
+        ms.clock   = match.clock;
+        ms.date    = match.date;
+        ms.fetched = true;
+        ms.result  = cond.check(match.scoreA, match.scoreB, match.state);
+        if(changed) {
+          ms.updated = true;
+          // 5초 후 라벨 자동 제거
+          setTimeout(()=>{ ms.updated = false; render(); }, 10000);
+        }
+        return true;
+      }
+    }catch(e){ /* 다음 시도 */ }
+  }
+  return false;
+}
+
+let autoTimer = null;
+
+async function fetchAll(){
+  // 캐시 초기화 (새로고침 시)
+  Object.keys(dateCache).forEach(k=>delete dateCache[k]);
+
+  setApiStatus('loading','⏳ ESPN 스코어보드 불러오는 중...');
+
+  const results = await Promise.allSettled(
+    CONDITIONS.map(async c=>{
+      const found = await fetchOne(c);
+      return { id:c.id, found };
+    })
+  );
+
+  const ok    = results.filter(r=>r.status==='fulfilled'&&r.value.found).length;
+  const notFound = results.filter(r=>r.status==='fulfilled'&&!r.value.found).length;
+  const errored  = results.filter(r=>r.status==='rejected').length;
+  const foundIds = results
+    .filter(r=>r.status==='fulfilled'&&r.value.found)
+    .map(r=>r.value.id).join(',');
+
+  const t = new Date().toLocaleTimeString('ko-KR');
+  if(notFound+errored===0){
+    setApiStatus('ok', `✅ ${t} 갱신 완료 · 전체 ${ok}개 수신`);
+  } else {
+    setApiStatus('ok',
+      `✅ ${t} · ${ok}개 수신(${foundIds||'없음'}) / ${notFound}개 미확인(일정前)`);
+  }
+  render();
+  // 3위 순위 탭도 같이 갱신
+  standingCache = null;
+  if(document.getElementById('tab-standing').classList.contains('active')) fetchStanding();
+  else fetchStanding(); // 백그라운드 갱신
+}
+
+function setApiStatus(cls, msg){
+  const el = document.getElementById('apiText');
+  el.className = 'api-text ' + cls;
+  el.textContent = msg;
+}
+
+function fmtDate(iso){
+  if(!iso) return '';
+  const d = new Date(iso);
+  if(isNaN(d)) return '';
+  return d.toLocaleString('ko-KR',{
+    timeZone:'Asia/Seoul',
+    month:'numeric', day:'numeric',
+    weekday:'short',
+    hour:'numeric', minute:'2-digit', hour12:true
+  });
+}
+
+// ── 응원 툴팁 표시/숨김 ──
+function showCheer(e, id) {
+  const tooltip = document.querySelector('.cheer-tooltip[data-id="' + id + '"]');
+  if(!tooltip) return;
+  const rect = e.currentTarget.getBoundingClientRect();
+  const isMobile = window.innerWidth <= 820;
+
+  // 최대 너비 제한
+  tooltip.style.maxWidth = isMobile ? (window.innerWidth - 24) + 'px' : '280px';
+  tooltip.style.display = 'block';
+
+  const tw = tooltip.offsetWidth;
+  const th = tooltip.offsetHeight;
+
+  if(isMobile) {
+    // 모바일: 화면 중앙 상단에 고정
+    const left = Math.max(12, (window.innerWidth - tw) / 2);
+    tooltip.style.left = left + 'px';
+    // 행 위로 뜨되 화면 밖 안 넘치게
+    let top = rect.top - th - 10;
+    if(top < 8) top = rect.bottom + 10; // 위 공간 없으면 아래로
+    top = Math.max(8, Math.min(top, window.innerHeight - th - 8));
+    tooltip.style.top = top + 'px';
+  } else {
+    // PC: 오른쪽 공간 있으면 오른쪽, 없으면 왼쪽
+    const spaceRight = window.innerWidth - rect.right;
+    if(spaceRight >= tw + 12) {
+      tooltip.style.left = (rect.right + 8) + 'px';
+    } else {
+      tooltip.style.left = Math.max(8, rect.left - tw - 8) + 'px';
+    }
+    let top = rect.top + rect.height/2 - th/2;
+    top = Math.max(8, Math.min(top, window.innerHeight - th - 8));
+    tooltip.style.top = top + 'px';
+  }
+}
+function hideCheer(id) {
+  const tooltip = document.querySelector('.cheer-tooltip[data-id="' + id + '"]');
+  if(tooltip) tooltip.style.display = 'none';
+}
+
+// ── 툴팁 위치 제어 ──
+document.addEventListener('DOMContentLoaded', () => {
+  function positionTooltip(icon, tooltip) {
+    const rect = icon.getBoundingClientRect();
+    const isMobile = window.innerWidth <= 820;
+    tooltip.style.display = 'block';
+    // 위치 계산 후 화면 밖으로 안 나가도록
+    if(isMobile) {
+      // 모바일: 위로 표시
+      tooltip.style.left = Math.max(8, rect.left + rect.width/2 - tooltip.offsetWidth/2) + 'px';
+      tooltip.style.top = (rect.top - tooltip.offsetHeight - 10) + 'px';
+      // 말풍선 화살표 아래로
+      tooltip.dataset.dir = 'up';
+    } else {
+      // PC: 오른쪽 표시
+      tooltip.style.top = (rect.top + rect.height/2 - tooltip.offsetHeight/2) + 'px';
+      tooltip.style.left = (rect.right + 10) + 'px';
+      tooltip.dataset.dir = 'right';
+    }
+  }
+  document.addEventListener('mouseover', e => {
+    const wrap = e.target.closest('.info-wrap');
+    if(!wrap) return;
+    const tooltip = wrap.querySelector('.info-tooltip');
+    if(!tooltip) return;
+    const icon = wrap.querySelector('.info-icon');
+    positionTooltip(icon, tooltip);
+  });
+  // 모바일 터치 - i 아이콘
+  document.addEventListener('touchstart', e => {
+    const wrap = e.target.closest('.info-icon');
+    if(!wrap) return;
+    const infoWrap = wrap.closest('.info-wrap');
+    const tooltip = infoWrap?.querySelector('.info-tooltip');
+    if(!tooltip) return;
+    const isVisible = tooltip.style.display === 'block';
+    document.querySelectorAll('.info-tooltip').forEach(t => t.style.display = 'none');
+    if(!isVisible) positionTooltip(wrap, tooltip);
+    e.preventDefault();
+  }, {passive:false});
+  // 모바일 터치 - 응원 툴팁
+  document.addEventListener('touchstart', e => {
+    const item = e.target.closest('.match-item[onmouseenter]');
+    if(item) {
+      const id = item.getAttribute('onmouseenter')?.match(/'([A-Z]+)'/)?.[1];
+      if(id) {
+        const tooltip = document.querySelector('.cheer-tooltip[data-id="' + id + '"]');
+        const isVisible = tooltip?.style.display === 'block';
+        document.querySelectorAll('.cheer-tooltip').forEach(t => t.style.display = 'none');
+        if(!isVisible && tooltip) showCheer({currentTarget: item}, id);
+      }
+      return;
+    }
+    // 다른 곳 터치 시 닫기
+    if(!e.target.closest('.cheer-tooltip')) {
+      document.querySelectorAll('.cheer-tooltip').forEach(t => t.style.display = 'none');
+    }
+  }, {passive:true});
+  // 스크롤 시 툴팁 닫기
+  window.addEventListener('scroll', () => {
+    document.querySelectorAll('.cheer-tooltip').forEach(t => t.style.display = 'none');
+  }, {passive:true});
+  document.addEventListener('mouseout', e => {
+    const wrap = e.target.closest('.info-wrap');
+    if(!wrap) return;
+    const tooltip = wrap.querySelector('.info-tooltip');
+    if(tooltip) tooltip.style.display = 'none';
+  });
+});
+
+// ── 파티클 애니메이션 ──
+(function(){
+  const canvas = document.getElementById('particleCanvas');
+  if(!canvas) return;
+  const ctx = canvas.getContext('2d');
+
+  const ICONS = ['⚽','🏆','⭐','🎯','🔥','🥇','🎉','✨'];
+  const particles = [];
+
+  function resize(){
+    canvas.width  = canvas.offsetWidth;
+    canvas.height = canvas.offsetHeight;
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  for(let i=0; i<22; i++){
+    particles.push({
+      x: Math.random() * canvas.width,
+      y: Math.random() * canvas.height,
+      icon: ICONS[Math.floor(Math.random()*ICONS.length)],
+      size: 12 + Math.random()*14,
+      speedX: (Math.random()-0.5)*0.5,
+      speedY: -0.2 - Math.random()*0.4,
+      opacity: 0.15 + Math.random()*0.35,
+      phase: Math.random()*Math.PI*2,
+      amp: 10 + Math.random()*20,
+      freq: 0.008 + Math.random()*0.012,
+    });
+  }
+
+  let frame=0;
+  function animate(){
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    frame++;
+    particles.forEach(p=>{
+      p.y += p.speedY;
+      p.x += p.speedX + Math.sin(frame*p.freq + p.phase)*0.4;
+      if(p.y < -30) { p.y = canvas.height+10; p.x = Math.random()*canvas.width; }
+      if(p.x < -30) p.x = canvas.width+10;
+      if(p.x > canvas.width+30) p.x = -10;
+      ctx.save();
+      ctx.globalAlpha = p.opacity;
+      ctx.font = p.size+'px serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      // 살짝 흔들리는 회전
+      ctx.translate(p.x, p.y);
+      ctx.rotate(Math.sin(frame*p.freq*0.5+p.phase)*0.3);
+      ctx.fillText(p.icon, 0, 0);
+      ctx.restore();
+    });
+    requestAnimationFrame(animate);
+  }
+  animate();
+})();
+
+function toggleAuto(){
+  const btn = document.getElementById('autoBtn');
+  if(autoTimer){
+    clearInterval(autoTimer);
+    autoTimer=null;
+    btn.classList.remove('on');
+    document.getElementById('autoState').textContent = 'OFF';
+  } else {
+    btn.classList.add('on');
+    document.getElementById('autoState').textContent = 'ON';
+    fetchAll();
+    autoTimer=setInterval(fetchAll,60000);
+  }
+}
+
+// ─────────────────────────────────────────
+// 확률 계산
+// ─────────────────────────────────────────
+function calcProb(){
+  let s=0,f=0,w=0,p=0;
+  CONDITIONS.forEach(c=>{
+    const r=MS[c.id].result;
+    if(r==='success')s++;
+    else if(r==='fail')f++;
+    else if(r==='partial')p++;
+    else w++;
+  });
+  const needed=4;
+  const possible = s + p + w; // 최대로 가능한 성공 수
+  let prob=0;
+
+  if(s >= needed){
+    prob = 100; // 이미 4개 충족
+  } else if(possible < needed){
+    prob = 0;   // 다 성공해도 4개 불가
+  } else {
+    // 남은 필요 수 / 남은 가능 수 비율 기반
+    // 실패가 많을수록 분모(전체)가 줄어들어 자연스럽게 낮아짐
+    const stillNeed = needed - s;   // 앞으로 더 필요한 수
+    const canStill  = w + p;        // 아직 결과 미확정
+    // P(canStill개 중 stillNeed개 이상) — 각 조건 40% 성공률 가정 (보수적)
+    const pEach = 0.4;
+    let cumul = 0;
+    for(let k=stillNeed; k<=canStill; k++){
+      let comb = 1;
+      for(let i=0; i<k; i++) comb = comb*(canStill-i)/(i+1);
+      cumul += comb * Math.pow(pEach,k) * Math.pow(1-pEach, canStill-k);
+    }
+    prob = Math.min(99, Math.round(cumul * 100));
+  }
+  return {prob,s,f,w,p,remaining:Math.max(0,needed-s)};
+}
+
+// ─────────────────────────────────────────
+// 렌더
+// ─────────────────────────────────────────
+const ICONS = { success:'✅', fail:'❌', partial:'🔄', wait:'⏳' };
+const TAGS  = { success:'⭕ 성공', fail:'❌ 실패', partial:'🔄 진행중', wait:'⏳ 대기' };
+
+function scoreStr(ms){
+  if(ms.scoreA===null) return '- : -';
+  return `${ms.scoreA} : ${ms.scoreB}`;
+}
+
+function stateLabel(st){
+  if(st==='done') return {text:'종료', cls:'done'};
+  if(st==='live') return {text:'LIVE', cls:'live'};
+  return {text:'예정', cls:'pre'};
+}
+
+function render(){
+  const {prob,s,f,w,p,remaining} = calcProb();
+
+  // 확률 헤더
+  const cls = prob>=70?'high':prob>=35?'mid':'low';
+  document.getElementById('probNum').className='prob-number '+cls;
+  document.getElementById('probNum').style.fontSize = '';
+  document.getElementById('probNum').style.color = '';
+  document.getElementById('probNum').textContent=prob+'%';
+  const bar=document.getElementById('probBar');
+  bar.style.width=prob+'%';
+  bar.className='prob-bar-fill '+cls;
+  document.getElementById('cntS').textContent=s;
+  document.getElementById('cntF').textContent=f;
+  document.getElementById('cntW').textContent=w+p;
+  document.getElementById('needMore').textContent=remaining;
+  document.getElementById('probSub').innerHTML = s>=4
+    ? `🎉 조건 <strong>${s}개</strong> 충족 — ${s>=7?'🟢🟢 진출 매우 유력':s>=5?'🟢 진출 유력':'🟡 진출 가능권 진입!'}`
+    : `조건 충족 <strong>${s}</strong> / 11개 &nbsp;·&nbsp; <span class="info-wrap">4개 이상 충족 시 32강 가능권<i class="info-icon">i</i><div class="info-tooltip">0~2개 🔴 진출 어려움<br>3개&nbsp;&nbsp;&nbsp;&nbsp; 🟠 진출 도전권<br>4개&nbsp;&nbsp;&nbsp;&nbsp; 🟡 진출 가능권<br>5~6개 🟢 진출 유력<br>7개+&nbsp;&nbsp; 🟢🟢 진출 매우 유력</div></span>`;
+
+  // LIVE 배지
+  const hasLive = CONDITIONS.some(c=>MS[c.id].state==='live');
+  const lb=document.getElementById('liveBadge');
+  lb.textContent=hasLive?'🔴 LIVE':'대기중';
+  lb.className='panel-badge'+(hasLive?' live':'');
+
+  document.getElementById('checkBadge').textContent=`${s} / 11`;
+
+  // 경기 일정
+  document.getElementById('scheduleList').innerHTML = CONDITIONS.map(cond=>{
+    const ms=MS[cond.id];
+    const sl=stateLabel(ms.state);
+    const sc=scoreStr(ms);
+    const clockInfo = ms.state==='live'&&ms.clock ? ` ${ms.clock}` : '';
+    const isLive = ms.state === 'live';
+    const isDone = ms.state === 'done';
+    const isSoon = ms.state === 'pre' && ms.date && (() => {
+      const diff = new Date(ms.date) - new Date();
+      return diff > 0 && diff <= 30 * 60 * 1000;
+    })();
+    const soonMin = isSoon ? Math.ceil((new Date(ms.date) - new Date()) / 60000) : 0;
+    const naverUrl = 'https://chzzk.naver.com/home/sports/fifa-worldcup-2026';
+    const cheer = (!isDone) ? getCheer(cond, ms) : null;
+    const cheerLines = cheer ? cheer.lines.map(l=>
+      `<div class="cheer-line">
+        <div class="cheer-text">${l.text}${l.pron?` <span class="cheer-pron">(${l.pron})</span>`:''}</div>
+        ${l.mean?`<div class="cheer-mean">— ${l.mean}</div>`:''}
+      </div>`
+    ).join('') : '';
+    const cheerHtml = cheer ? `
+      <div class="cheer-tooltip" data-id="${cond.id}">
+        <div class="cheer-tooltip-title">📢 ${cheer.title}</div>
+        ${cheerLines}
+      </div>` : '';
+
+    return `
+    <div class="match-item${isLive?' is-live':isSoon?' is-soon':isDone?' is-done':''}"
+      ${cheer?`onmouseenter="showCheer(event,'${cond.id}')" onmouseleave="hideCheer('${cond.id}')"`:''}>
+      <div class="result-dot ${ms.result}"></div>
+      <div class="match-group">${cond.group}</div>
+      <div class="match-teams">
+        <div class="match-name">
+          ${cond.match}
+          ${isLive?'<span class="live-ping" style="margin-left:6px;">LIVE</span>':''}
+          ${cheer?'<span style="font-size:10px;color:var(--text-muted);margin-left:4px;">📢</span>':''}
+        </div>
+        <div class="match-condition">${cond.need}</div>
+        ${!isLive&&!isDone&&ms.date?`<div class="match-date">📅 ${fmtDate(ms.date)}</div>`:''}
+      </div>
+      ${isLive?`<a href="${naverUrl}" target="_blank" class="live-watch-btn">▶ 네이버 라이브</a>`:''}
+      ${isSoon?`<span class="soon-badge">⏰ ${soonMin}분 후 시작</span>`:''}
+      <div class="match-score-col">
+        ${ms.updated?'<div class="update-label">⬆ UP</div>':''}
+        <div class="score-big ${sl.cls}">${sc}</div>
+        <div class="score-status-tag ${sl.cls}">${sl.text}${clockInfo}</div>
+      </div>
+      ${cheerHtml}
+    </div>`;
+  }).join('');
+
+  // 체크리스트
+  document.getElementById('checkList').innerHTML = CONDITIONS.map(cond=>{
+    const ms=MS[cond.id];
+    const r=ms.result;
+    const sc = ms.scoreA!==null?` (${ms.scoreA}:${ms.scoreB})`:'';
+    const descMap = {
+      success:'조건 충족'+sc,
+      fail:'조건 불충족'+sc,
+      partial:'진행중'+sc+' — 조건 충족 상태',
+      wait:'경기 전 또는 데이터 없음'
+    };
+    return `
+    <div class="check-item">
+      <div class="check-icon ${r}">${ICONS[r]}</div>
+      <div class="check-body">
+        <div class="check-group">${cond.group}</div>
+        <div class="check-title">${cond.match}</div>
+        <div class="check-desc ${r}">${descMap[r]||''}</div>
+      </div>
+      <div class="check-tag ${r}">${TAGS[r]}</div>
+    </div>`;
+  }).join('');
+}
+
+// ─────────────────────────────────────────
+// 디버그: API 원본 출력
+// ─────────────────────────────────────────
+async function runDebug(){
+  const box = document.getElementById('debugBox');
+  const out = document.getElementById('debugContent');
+  box.style.display = 'block';
+  out.textContent = '⏳ ESPN API 조회 중...\n';
+
+  // 최근 5일치 날짜 + 파라미터 없는 호출
+  const dates = [null];
+  for(let i=0;i<=5;i++){
+    const d=new Date(); d.setDate(d.getDate()-i);
+    dates.push(`${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}`);
+  }
+
+  for(const date of dates){
+    const url = date
+      ? `https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/scoreboard?dates=${date}`
+      : `https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/scoreboard`;
+    try {
+      const res = await fetch(url, {cache:'no-store'});
+      if(!res.ok){ out.textContent += `[${date||'nodate'}] HTTP ${res.status}\n`; continue; }
+      const data = await res.json();
+      const evs = data?.events||[];
+      if(!evs.length){ out.textContent += `[${date||'nodate'}] 경기 없음\n`; continue; }
+      out.textContent += `\n━━ ${date||'(날짜없음)'} — ${evs.length}경기 ━━\n`;
+      for(const ev of evs){
+        const comp = ev.competitions?.[0];
+        const teams = (comp?.competitors||[]).map(t=>`${t.team?.displayName}(${t.team?.abbreviation}) ${t.score??'-'}`).join(' vs ');
+        const st = comp?.status?.type?.state;
+        const done = comp?.status?.type?.completed;
+        const clock = comp?.status?.displayClock||'';
+        out.textContent += `  ${teams} | ${st}${done?' ✓완료':''} ${clock}\n`;
+      }
+    } catch(e){
+      out.textContent += `[${date||'nodate'}] 오류: ${e.message}\n`;
+    }
+  }
+  out.textContent += '\n✅ 조회 완료';
+}
+
+// ─────────────────────────────────────────
+// 탭 전환
+// ─────────────────────────────────────────
+function switchTab(tab) {
+  document.querySelectorAll('.tab-btn').forEach((b,i) => {
+    b.classList.toggle('active', (i===0&&tab==='cases')||(i===1&&tab==='standing'));
+  });
+  document.getElementById('tab-cases').classList.toggle('active', tab==='cases');
+  document.getElementById('tab-standing').classList.toggle('active', tab==='standing');
+  if(tab==='standing') fetchStanding();
+}
+
+// ─────────────────────────────────────────
+// 3위 순위 fetch
+// ─────────────────────────────────────────
+const TEAM_FLAGS = {
+  'sweden':'🇸🇪','ecuador':'🇪🇨','bosnia':'🇧🇦','paraguay':'🇵🇾','croatia':'🇭🇷',
+  'korea':'🇰🇷','south korea':'🇰🇷','republic of korea':'🇰🇷','korea republic':'🇰🇷',
+  'algeria':'🇩🇿','scotland':'🏴󠁧󠁢󠁳󠁣󠁴󠁿','cabo verde':'🇨🇻','cape verde':'🇨🇻',
+  'belgium':'🇧🇪','dr congo':'🇨🇩','congo':'🇨🇩','senegal':'🇸🇳',
+  'brazil':'🇧🇷','japan':'🇯🇵','spain':'🇪🇸','germany':'🇩🇪','france':'🇫🇷',
+  'argentina':'🇦🇷','australia':'🇦🇺','egypt':'🇪🇬','iran':'🇮🇷','iraq':'🇮🇶',
+  'portugal':'🇵🇹','colombia':'🇨🇴','england':'🏴󠁧󠁢󠁥󠁮󠁧󠁿','ghana':'🇬🇭',
+  'austria':'🇦🇹','uzbekistan':'🇺🇿','uruguay':'🇺🇾','saudi':'🇸🇦','mexico':'🇲🇽',
+  'netherlands':'🇳🇱','norway':'🇳🇴','morocco':'🇲🇦','haiti':'🇭🇹','czech':'🇨🇿',
+  'turkey':'🇹🇷','tunisia':'🇹🇳','new zealand':'🇳🇿','jordan':'🇯🇴','curacao':'🇨🇼',
+  'switzerland':'🇨🇭','canada':'🇨🇦','qatar':'🇶🇦','south africa':'🇿🇦','cameroon':'🇨🇲',
+};
+
+function getFlag(name) {
+  const n = (name||'').toLowerCase();
+  for(const [k,v] of Object.entries(TEAM_FLAGS)) {
+    if(n.includes(k)) return v;
+  }
+  return '🏳️';
+}
+
+let standingCache = null;
+let standingFetching = false;
+
+const TEAM_KO = {
+  'MEX':'멕시코','CZE':'체코','RSA':'남아공','KOR':'대한민국',
+  'CAN':'캐나다','BIH':'보스니아','QAT':'카타르','SUI':'스위스',
+  'BRA':'브라질','SCO':'스코틀랜드','MAR':'모로코','HAI':'아이티',
+  'USA':'미국','PAR':'파라과이','AUS':'호주','TUR':'튀르키예',
+  'GER':'독일','CIV':'코트디부아르','ECU':'에콰도르','CUW':'퀴라소',
+  'NED':'네덜란드','JPN':'일본','SWE':'스웨덴','TUN':'튀니지',
+  'BEL':'벨기에','IRN':'이란','EGY':'이집트','NZL':'뉴질랜드',
+  'ESP':'스페인','URU':'우루과이','CPV':'카보베르데','KSA':'사우디',
+  'FRA':'프랑스','SEN':'세네갈','NOR':'노르웨이','IRQ':'이라크',
+  'ARG':'아르헨티나','AUT':'오스트리아','ALG':'알제리','JOR':'요르단',
+  'POR':'포르투갈','COL':'콜롬비아','UZB':'우즈베키스탄','COD':'콩고DR',
+  'ENG':'잉글랜드','GHA':'가나','CRO':'크로아티아','PAN':'파나마',
+};
+
+const TEAM_GROUP = {
+  'MEX':'A','CZE':'A','RSA':'A','KOR':'A',
+  'CAN':'B','BIH':'B','QAT':'B','SUI':'B',
+  'BRA':'C','SCO':'C','MAR':'C','HAI':'C',
+  'USA':'D','PAR':'D','AUS':'D','TUR':'D',
+  'GER':'E','CIV':'E','ECU':'E','CUW':'E',
+  'NED':'F','JPN':'F','SWE':'F','TUN':'F',
+  'BEL':'G','IRN':'G','EGY':'G','NZL':'G',
+  'ESP':'H','URU':'H','CPV':'H','KSA':'H',
+  'FRA':'I','SEN':'I','NOR':'I','IRQ':'I',
+  'ARG':'J','AUT':'J','ALG':'J','JOR':'J',
+  'POR':'K','COL':'K','UZB':'K','COD':'K',
+  'ENG':'L','GHA':'L','CRO':'L','PAN':'L',
+};
+
+async function fetchStanding() {
+  if(standingFetching) return;
+  standingFetching = true;
+
+  const listEl = document.getElementById('standingList');
+  const badge  = document.getElementById('standingBadge');
+  if(!standingCache) listEl.innerHTML = '<div class="standing-loading">⏳ 불러오는 중...</div>';
+
+  try {
+    // 날짜별로만 호출 (중복 방지를 위해 null 제거)
+    const dates = [];
+    for(let i=7; i>=-2; i--) {
+      const d = new Date(); d.setDate(d.getDate()-i);
+      dates.push(`${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}`);
+    }
+
+    const teams = {};
+    const seenEvents = new Set();
+
+    for(const date of dates) {
+      try {
+        const res = await fetch(`${ESPN}?dates=${date}`, {cache:'no-store'});
+        if(!res.ok) continue;
+        const data = await res.json();
+
+        for(const ev of (data?.events||[])) {
+          const evId = ev?.id;
+          if(!evId || seenEvents.has(evId)) continue; // 중복 경기 완전 차단
+          const comp = ev?.competitions?.[0];
+          if(!comp?.status?.type?.completed) continue;
+          seenEvents.add(evId);
+
+          const competitors = comp?.competitors || [];
+          if(competitors.length !== 2) continue;
+
+          for(const side of competitors) {
+            const abbr = side?.team?.abbreviation || '';
+            const grp = TEAM_GROUP[abbr];
+            if(!grp) continue;
+
+            const score    = Number(side?.score ?? 0);
+            const opp      = competitors.find(c => c.team?.abbreviation !== abbr);
+            const oppScore = Number(opp?.score ?? 0);
+
+            if(!teams[abbr]) teams[abbr] = {
+              abbr,
+              name: TEAM_KO[abbr] || side?.team?.displayName || '',
+              group: grp,
+              logo: side?.team?.flag || side?.team?.logos?.[0]?.href || '',
+              gp:0, w:0, d:0, l:0, gf:0, ga:0, pts:0
+            };
+            const t = teams[abbr];
+            t.gp++;
+            t.gf += score;
+            t.ga += oppScore;
+            if(side.winner === true)      { t.w++; t.pts += 3; }
+            else if(opp?.winner === true) { t.l++; }
+            else                          { t.d++; t.pts += 1; }
+          }
+        }
+      } catch(e) {}
+    }
+
+    // 각 조 3위 추출
+    const byGroup = {};
+    Object.values(teams).forEach(t => {
+      if(!byGroup[t.group]) byGroup[t.group] = [];
+      byGroup[t.group].push(t);
+    });
+
+    const thirdPlaces = [];
+    'ABCDEFGHIJKL'.split('').forEach(grp => {
+      const list = (byGroup[grp]||[]);
+      list.sort((a,b)=>(b.pts-a.pts)||((b.gf-b.ga)-(a.gf-a.ga))||(b.gf-a.gf));
+      if(list.length >= 3) {
+        thirdPlaces.push({...list[2], gd: list[2].gf - list[2].ga});
+      }
+    });
+
+    if(thirdPlaces.length === 0) {
+      listEl.innerHTML = '<div class="standing-loading">⚠️ 아직 완료된 경기가 부족해요.<br>경기가 더 진행되면 순위가 표시됩니다.</div>';
+      standingFetching = false;
+      return;
+    }
+
+    thirdPlaces.sort((a,b)=>(b.pts-a.pts)||(b.gd-a.gd)||(b.gf-a.gf));
+    standingCache = thirdPlaces;
+    renderStanding(thirdPlaces);
+
+    badge.textContent = new Date().toLocaleTimeString('ko-KR') + ' 갱신';
+
+  } catch(e) {
+    listEl.innerHTML = `<div class="standing-loading">❌ 오류: ${e.message}</div>`;
+  }
+  standingFetching = false;
+}
+
+function renderStanding(list) {
+  const listEl = document.getElementById('standingList');
+  const header = `
+    <div class="standing-cols">
+      <div></div>
+      <div class="col-team">팀</div>
+      <div>경기</div><div>승</div><div>무</div><div>패</div>
+      <div>득점</div><div>실점</div><div>승점</div>
+    </div>`;
+
+  const rows = list.map((t,i) => {
+    const rank = i+1;
+    const isKorea = t.abbr === 'KOR';
+    const borderLine = rank === 8;
+    const rankClass = rank <= 4 ? 'top' : rank <= 8 ? 'border' : '';
+    const rowClass = [
+      'standing-row',
+      isKorea ? 'is-korea' : '',
+      rank < 8 ? 'qualify' : '',
+      borderLine ? 'border-line' : ''
+    ].filter(Boolean).join(' ');
+
+    return `
+    <div class="${rowClass}">
+      <div class="rank-num ${rankClass}">${rank}</div>
+      <div class="team-name-cell">
+        ${t.logo
+          ? `<img src="${t.logo}" style="width:22px;height:15px;object-fit:cover;border-radius:2px;border:1px solid var(--border);" onerror="this.style.display='none'">`
+          : `<span class="team-flag">${getFlag(t.name)}</span>`
+        }
+        <span class="team-name">${t.name}</span>
+        <span style="font-size:9px;color:var(--text-muted);margin-left:3px;background:var(--border);padding:1px 5px;border-radius:4px;">${t.group}조</span>
+      </div>
+      <div>${t.gp}</div><div>${t.w}</div><div>${t.d}</div><div>${t.l}</div>
+      <div>${t.gf}</div><div>${t.ga}</div>
+      <div class="pts-cell">${t.pts}</div>
+    </div>`;
+  }).join('');
+
+  listEl.innerHTML = header + rows + `
+    <div style="padding:10px 16px;font-size:11px;color:var(--text-muted);border-top:1px solid var(--border-light);">
+      🟢 진출권 (상위 8팀) &nbsp;|&nbsp; 🟠 경계선 (8위)
+    </div>`;
+}
+// ─────────────────────────────────────────
+// 초기 실행
+// ─────────────────────────────────────────
+// 초기 로딩 표시 (API 오기 전엔 확률 숫자 숨김)
+document.getElementById('autoBtn').classList.add('on');
+document.getElementById('probNum').textContent = '- -';
+document.getElementById('probNum').style.fontSize = 'clamp(24px,3.5vw,36px)';
+document.getElementById('probNum').style.color = '#b0b8c1';
+document.getElementById('probSub').textContent = 'ESPN 데이터 불러오는 중...';
+setTimeout(toggleAuto, 150); // 자동갱신 ON으로 시작
+</script>
+</body>
+</html>
